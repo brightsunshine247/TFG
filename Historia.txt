@@ -1,0 +1,9 @@
+Herramientas:
+JavaScript, JQuery, HMTL5, CSS3, dc, d3, crosfillter, bootstrap, json.
+
+Prototipo1:
+Esta es la fase de aprendizaje, donde experimento la bibliotecas de dc, d3 y crossfillter.
+Es un demo donde represento las gráficas con dc.js y crossfillter de un archivo json.
+
+Prototipo2:
+Combinación de varios archivos json.
