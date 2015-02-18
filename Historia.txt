@@ -2,8 +2,20 @@ Herramientas:
 JavaScript, JQuery, HMTL5, CSS3, dc, d3, crosfillter, bootstrap, json.
 
 Prototipo1:
-Esta es la fase de aprendizaje, donde experimento la bibliotecas de dc, d3 y crossfillter.
+Esta es la fase de aprendizaje, donde experimento la bibliotecas de dc, d3 y crossfilter.
 Es un demo donde represento las gráficas con dc.js y crossfillter de un archivo json.
 
 Prototipo2:
-Combinación de varios archivos json.
+Uso de la biblioteca dc, d3 y crossfilter con los archivos json: its_demographic_aging.json y its_demographic_birth.json.
+Las gráficas hechas en este prototipo han sido:
+	1. Pie: Aging VS Birth
+	2. Pie-donuts: Dividido por años.
+	3. Pie-donuts: Dividido por meses.
+	4. Row: Dividido por rangos de 6 meses.
+	5. Bar: Dividido por dias.
+	6. Composite-Line: Aging VS Birth.
+	7. Composite-Bar: Aging VS Birth.
+	8. Table: Date, Id, Name, Aging o Birth
+	
+Prototipo3:
+Uso de las bibliotecas c3, d3, crossfilter con los archivos json: its_demographic_aging.json y its_demographic_birth.json.

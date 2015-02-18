@@ -37,28 +37,35 @@
 
             <div class="row">
                 <div id="gain-loss-chart">
-                    <strong>Days by Gain/Loss</strong>
+                    <strong>Siguen VS No Siguen</strong>
                     <a class="reset" href="javascript:gainOrLossChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
 
                     <div class="clearfix"></div>
                 </div>
 
+				<div id="year">
+                    <strong>Year</strong>
+                    <a class="reset" href="javascript:yearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+
+                    <div class="clearfix"></div>
+                </div>
+				
                 <div id="quarter-chart">
-                    <strong>Id per Years</strong>
+                    <strong>Meses del año</strong>
                     <a class="reset" href="javascript:quarterChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
 
                     <div class="clearfix"></div>
                 </div>
 
                 <div id="day-of-week-chart">
-                    <strong>Month of Year</strong>
+                    <strong>Aging VS Birth</strong>
                     <a class="reset" href="javascript:dayOfWeekChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
 
                     <div class="clearfix"></div>
                 </div>
-
+				
                 <div id="fluctuation-chart">
-                    <strong>Month by Senders</strong>
+                    <strong>Dias del mes</strong>
                     <span class="reset" style="display: none;">range: <span class="filter"></span></span>
                     <a class="reset" href="javascript:fluctuationChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
 
@@ -68,7 +75,7 @@
 
             <div class="row">
                 <div id="monthly-move-chart">
-                    <strong>Sum week</strong>
+                    <strong>Aging VS Birth</strong>
                     <span class="reset" style="display: none;">range: <span class="filter"></span></span>
                     <a class="reset" href="javascript:moveChart.filterAll();volumeChart.filterAll();dc.redrawAll();"
                        style="display: none;">reset</a>
@@ -76,13 +83,21 @@
                     <div class="clearfix"></div>
                 </div>
             </div>
-
             <div class="row">
                 <div id="monthly-volume-chart">
                 </div>
                 <p class="muted pull-right" style="margin-right: 15px;">select a time range to zoom in</p>
             </div>
+			<div>
+				<div id="combine">
+					<strong>Combine Bar</strong>
+					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
+                    <a class="reset" href="javascript:combChart.filterAll();dc.redrawAll();"
+                       style="display: none;">reset</a>
 
+                    <div class="clearfix"></div>
+				</div>
+			</div>
             <div class="row">
                 <div>
                     <div class="dc-data-count">

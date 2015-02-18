@@ -5,7 +5,9 @@ $(document).ready(function(){
     var quarterChart = dc.pieChart('#quarter-chart');
     var barChart = dc.barChart('#fluctuation-chart');
     var rowChart = dc.rowChart('#day-of-week-chart');
-    var lineChart = dc.lineChart('#monthly-move-chart');
+	var yearChart = dc.pieChart('#year');
+    var lineCharts = dc.compositeChart('#monthly-move-chart');
+	var combined = dc.compositeChart('#combine');
     $.when(
         $.getJSON('its-demographics-aging.json', function (data) {
             aging = data;
@@ -14,29 +16,18 @@ $(document).ready(function(){
             birth = data;
         })
     ).done(function(){
-        dato = dcFormat(birth['persons']);
-        dato2 = dcFormat(aging['persons']);
+        datos = birAgin(birth['persons'], aging['persons']);
+        dato = dcFormat(datos);
         var ndx = crossfilter(dato);
-        var ndx2 = crossfilter(dato2);
         var all = ndx.groupAll();
-        var all2 = ndx2.groupAll();
         var dateFormat = d3.time.format('%Y-%m-%dT%H:%M:%S');
         dato.forEach(function (d) {
             d.uno = 1;
-            d.dd = dateFormat.parse(aging['date']);
+            d.dd = dateFormat.parse(birth['date']);
             d.day = 16469-d.age;
             d.date = dateFormat.parse(dateFormat(new Date(1970, 0, d.day)));
-            if (dato2[d.id] != undefined){
-                d.sigue = 1;
-                d.no = 0;
-            }else{
-                d.no = 1;
-                d,sigue = 0;
-            }
-            
         });
-    
-        //Donuts Year per id
+        //Donuts
         var quarterDim = ndx.dimension(function(d) {
             return d.date.getMonth()+1;
         });
@@ -50,35 +41,65 @@ $(document).ready(function(){
             .dimension(quarterDim)
             .group(quarterGrp);
 
-        // Bar Senders
+        // Bar
         var barDim = ndx.dimension(function(d) {
-            return (d.day%31);
+            return (d.date.getDay());
         });
         var barGrp = barDim.group();
 
         barChart
-            .width(300).height(200)
+            .width(600).height(500)
             .dimension(barDim)
             .group(barGrp)
             .x(d3.scale.linear().domain([1,31]))
-            .elasticY(true);
-
+			.elasticX(true)
+			.centerBar(false)
+			.elasticY(true)
+			.brushOn(true)
+			.renderHorizontalGridLines(true)
+			.margins({
+				top: 10,
+				right: 10,
+				bottom: 75,
+				left: 100
+			})
         barChart.xAxis().tickFormat(function(d) {return d});
         barChart.yAxis().ticks(15);
 
-        // Row Month
-        var rowDim  = ndx.dimension(function(d) {
-            var month = d.date.getMonth();
-            var name = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dic'];
-            return month+1 + '.' + name[month];
-        });
-        var rowGrp = rowDim.group();
-        rowChart
-            .width(350).height(200)
-            .dimension(rowDim)
-            .group(rowGrp)
-            .elasticX(true);
+        // Row
+		var axisY = [];
+		var rowDim = ndx.dimension(function(d){
+			var i = Math.floor(d.age/181);
+			axisY[i]=((181*i)+'-'+((i+1)*181));
+			return axisY[i];
+		})
+		var rowGrp = rowDim.group();
+		rowChart
+			.width(700).height(500)
+			.elasticX(true)
+			.dimension(rowDim)
+			.group(rowGrp)
+			.elasticX(true)
+			.ordering(function(d) {
+				return -d.key.split('-')[0];
+			})
 
+		// Pie Year
+		var yearDim = ndx.dimension(function(d) {
+            return d.date.getFullYear();
+        });
+        var yearGrp = yearDim.group().reduceSum(function(d) {
+            return d.uno;
+        });
+        yearChart.width(180)
+            .height(180)
+            .radius(80)
+            .innerRadius(30)
+            .dimension(yearDim)
+            .group(yearGrp);
+
+
+			
         dc.dataCount('.dc-data-count')
             .dimension(ndx)
             .group(all)
@@ -98,16 +119,28 @@ $(document).ready(function(){
                 var format = d3.format('02d');
                 return d.date.getFullYear() + ' / ' + format((d.date.getMonth() + 1));
             })
-            .size(dato.length)
+            .size(dato.length/10)
             .columns([
                 {
                     label: 'date', // desired format of column name 'Change' when used as a label with a function.
                     format: function (d) {
-                        return d.date;
+                        var formato = d3.format('02d');
+						return d.date.getFullYear() + ' / ' + formato((d.date.getMonth() + 1)) + ' / ' + formato(d.date.getDay());
                     }
                 },
                 'id',
-                'name'
+                'name',
+				{
+					label: 'sigue',
+					format: function (d) {
+						if (d.sigue == 1){
+							return 'SI';
+						}else{
+							return 'NO';
+						};
+					}
+				}
+				
             ])
 
             .sortBy(function (d) {
@@ -119,33 +152,65 @@ $(document).ready(function(){
             });
 
         // Line
+		
         var lineDim = ndx.dimension(function (d) {
-            return d.day;
+            return d.age;
+        });
+		var lineDim2 = ndx.dimension(function (d) {
+            return d.age/31;
         });
         var lineGrp = lineDim.group().reduceSum(function (d) {
-            return Math.abs(d.age);
+            return d.sigue;
         });
-
-        lineChart
-            .renderArea(true)
-            .width(990)
-            .height(200)
+		var lineGrp2 = lineDim.group().reduceSum(function (d){
+			return d.nosigue;
+		})
+		/*
+		var mes = [];
+		var i = 1;
+		var j = 0;
+		var lineGrp2 = lineDim2.group().reduceSum(function (d){
+			if (i == 31){
+				i = 1;
+				j += 1;
+				mes[j] = d.sigue;
+			}else{
+				mes[j] += d.sigue; 
+				i += 1;
+			}
+			return mes[j];
+		})*/
+        lineCharts
+            .width(1000)
+            .height(350)
             .transitionDuration(1000)
             .margins({top: 30, right: 50, bottom: 25, left: 40})
-            .dimension(lineDim)
             .mouseZoomable(true)
-            .x(d3.time.scale().domain([new Date(2015, 0, 1), new Date(2015, 11, 31)]))
-            .round(d3.time.month.round)
-            .xUnits(d3.time.months)
+       	//	.x(d3.time.scale().domain([new Date(2015, 0, 1), new Date(2015, 11, 31)]))
+			.x(d3.scale.linear().domain([0,50]))
+//            .round(d3.time.month.round)
+//       		.xUnits(d3.time.months)
+			.elasticX(true)
             .elasticY(true)
             .renderHorizontalGridLines(true)
             .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
-            .brushOn(false)
-            .group(lineGrp)
+            .brushOn(true)
+			.compose([
+				dc.lineChart(lineCharts)
+					.dimension(lineDim)
+					.colors('red')
+					.group(lineGrp, "Birth")
+					.dashStyle([0,0]),
+				dc.lineChart(lineCharts)
+					.dimension(lineDim2)
+					.colors('blue')
+					.group(lineGrp2, "Aging")
+					.dashStyle([1,2])
+            ])
 
         // Gain and Lost
         var gainOrLoss = ndx.dimension(function (d) {
-            return d.no > d.sigue ? 'No' : 'Si';
+            return d.nosigue > d.sigue ?  'No': 'Si';
         });
         var gainOrLossGroup = gainOrLoss.group();
         gainOrLossChart
@@ -155,10 +220,57 @@ $(document).ready(function(){
             .dimension(gainOrLoss) // set dimension
             .group(gainOrLossGroup)
 
+		
+		// Bar combine
+		var combDim = ndx.dimension(function (d) {
+			var i = Math.floor(d.age/181);
+			return axisY[i];
+		});
+		var combGrp = combDim.group().reduceSum(function (d){
+			return d.uno;
+		});
+		var combGrp2 = combDim.group().reduceSum(function (d){
+			return d.sigue;
+		});
+		combined
+			.width(1100)
+			.height(500)
+			//  .colors( d3.scale.category10() )
+			//  .shareColors(true)
+			.brushOn(true)
+			.elasticY(true)
+			.x(d3.scale.ordinal().domain(axisY))
+			.xUnits(dc.units.ordinal)
+//			.xUnits( function() { return 20; } )
+//			.margins({top: 15, right: 10, bottom: 20, left: 40});
+			.renderHorizontalGridLines(true)
+			.margins({
+				top: 10,
+				right: 10,
+				bottom: 75,
+				left: 100
+			})
+			.legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
+			.compose([
+				dc.barChart(combined)
+					.dimension(combDim)
+					.colors('red')
+					.group(combGrp, 'Birth')
+					.centerBar(true)
+					.barPadding(0.2),
+
+				dc.barChart(combined)
+					.dimension(combDim)
+					.colors('blue')
+					.group(combGrp2, 'Aging')
+					.centerBar(true)
+					.barPadding(0.3)
+			])
 
         dc.renderAll();
     });
 });
+// Formato valido para dc.js
 function dcFormat(d){
     var array = [];
     var clave = [];
@@ -175,4 +287,35 @@ function dcFormat(d){
         array.push(dato);
     }
     return array;
+}
+// Para saber cuantos siguien y cuantos no segun Agin y Birth
+function birAgin(d1, d2){
+	var valor1 = [];
+	var valor2 = [];
+	var sigue = [];
+	var nosigue = [];
+	$.each(d1, function(key, val){
+		if (key == 'id'){
+			valor1.push(val);
+		}
+		
+	});
+	$.each(d2, function(key, val){
+		if (key == 'id'){
+			valor2.push(val);
+		}
+	});
+	for (var i=0; i<valor1[0].length; i++){
+		var si = 0;
+		var no = 1;
+		if(valor2[0].indexOf(valor1[0][i]) != -1){
+			si = 1;
+			no = 0;
+		}
+		sigue.push(si);
+		nosigue.push(no);
+	}
+	d1['sigue'] = sigue;
+	d1['nosigue'] = nosigue;
+	return d1
 }
