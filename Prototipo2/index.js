@@ -9,20 +9,22 @@ $(document).ready(function(){
     var lineCharts = dc.compositeChart('#monthly-move-chart');
 	var combined = dc.compositeChart('#combine');
     $.when(
+		// Load agin json file
         $.getJSON('its-demographics-aging.json', function (data) {
             aging = data;
         }),
+		// Load birth json file
         $.getJSON('its-demographics-birth.json', function (data) {
             birth = data;
         })
     ).done(function(){
-        datos = birAgin(birth['persons'], aging['persons']);
-        dato = dcFormat(datos);
-        var ndx = crossfilter(dato);
+        datas = birAgin(birth['persons'], aging['persons']);
+        data = dcFormat(datas);
+        var ndx = crossfilter(data);
         var all = ndx.groupAll();
         var dateFormat = d3.time.format('%Y-%m-%dT%H:%M:%S');
-        dato.forEach(function (d) {
-            d.uno = 1;
+        data.forEach(function (d) {
+            d.one = 1; // value 1 for each data
             d.dd = dateFormat.parse(birth['date']);
             d.day = 16469-d.age;
             d.date = dateFormat.parse(dateFormat(new Date(1970, 0, d.day)));
@@ -32,7 +34,7 @@ $(document).ready(function(){
             return d.date.getMonth()+1;
         });
         var quarterGrp = quarterDim.group().reduceSum(function(d) {
-            return d.uno;
+            return d.one;
         });
         quarterChart.width(180)
             .height(180)
@@ -84,12 +86,12 @@ $(document).ready(function(){
 				return -d.key.split('-')[0];
 			})
 
-		// Pie Year
+		// Pie per Year
 		var yearDim = ndx.dimension(function(d) {
             return d.date.getFullYear();
         });
         var yearGrp = yearDim.group().reduceSum(function(d) {
-            return d.uno;
+            return d.one;
         });
         yearChart.width(180)
             .height(180)
@@ -119,7 +121,7 @@ $(document).ready(function(){
                 var format = d3.format('02d');
                 return d.date.getFullYear() + ' / ' + format((d.date.getMonth() + 1));
             })
-            .size(dato.length/10)
+            .size(data.length/10)
             .columns([
                 {
                     label: 'date', // desired format of column name 'Change' when used as a label with a function.
@@ -227,7 +229,7 @@ $(document).ready(function(){
 			return axisY[i];
 		});
 		var combGrp = combDim.group().reduceSum(function (d){
-			return d.uno;
+			return d.one;
 		});
 		var combGrp2 = combDim.group().reduceSum(function (d){
 			return d.sigue;
@@ -270,49 +272,49 @@ $(document).ready(function(){
         dc.renderAll();
     });
 });
-// Formato valido para dc.js
+// Valid format for dc.js
 function dcFormat(d){
     var array = [];
-    var clave = [];
-    var valor = [];
+    var keys = [];
+    var value = [];
     $.each(d, function(key, val){
-        clave.push(key);
-        valor.push(val);
+        keys.push(key);
+        value.push(val);
     });
-    for (var i=0; i<valor[0].length; i++){
-        var dato = {};
-        for (var j=0; j<clave.length; j++){
-            dato[clave[j]] = valor[j][i];
+    for (var i=0; i<value[0].length; i++){
+        var data = {};
+        for (var j=0; j<keys.length; j++){
+            data[keys[j]] = value[j][i];
         }
-        array.push(dato);
+        array.push(data);
     }
     return array;
 }
-// Para saber cuantos siguien y cuantos no segun Agin y Birth
+// Combine two JSON file(Birth, Aging) into one
 function birAgin(d1, d2){
-	var valor1 = [];
-	var valor2 = [];
+	var value1 = [];
+	var value2 = [];
 	var sigue = [];
 	var nosigue = [];
 	$.each(d1, function(key, val){
 		if (key == 'id'){
-			valor1.push(val);
+			value1.push(val);
 		}
 		
 	});
 	$.each(d2, function(key, val){
 		if (key == 'id'){
-			valor2.push(val);
+			value2.push(val);
 		}
 	});
-	for (var i=0; i<valor1[0].length; i++){
-		var si = 0;
+	for (var i=0; i<value1[0].length; i++){
+		var yes = 0;
 		var no = 1;
-		if(valor2[0].indexOf(valor1[0][i]) != -1){
-			si = 1;
+		if(value2[0].indexOf(value1[0][i]) != -1){
+			yes = 1;
 			no = 0;
 		}
-		sigue.push(si);
+		sigue.push(yes);
 		nosigue.push(no);
 	}
 	d1['sigue'] = sigue;

@@ -1,9 +1,16 @@
 Herramientas:
-JavaScript, JQuery, HMTL5, CSS3, dc, d3, crosfillter, bootstrap, json.
+JavaScript, JQuery, HMTL5, CSS3, dc, nvd3, c3, d3, crosfillter, bootstrap, json.
 
 Prototipo1:
-Esta es la fase de aprendizaje, donde experimento la bibliotecas de dc, d3 y crossfilter.
-Es un demo donde represento las gráficas con dc.js y crossfillter de un archivo json.
+Esta es la fase de aprendizaje, donde experimento las bibliotecas de dc, d3 y crossfilter.
+Es un demo donde represento las gráficas con dc.js usando crossfillter con un fichero json.
+Para poder crear las gráficas primero hay que masajear los datos para que dc.js los acepte de la siguiente manera:
+	[
+		{"key": "a", "value": 1},
+		{"key": "b", "value": 2},
+		{"key": "c", "value": 3}
+	]
+De esta manera ya podemos empezar ha trabajar con dc.js.
 
 Prototipo2:
 Uso de la biblioteca dc, d3 y crossfilter con los archivos json: its_demographic_aging.json y its_demographic_birth.json.
@@ -12,10 +19,60 @@ Las gráficas hechas en este prototipo han sido:
 	2. Pie-donuts: Dividido por años.
 	3. Pie-donuts: Dividido por meses.
 	4. Row: Dividido por rangos de 6 meses.
-	5. Bar: Dividido por dias.
+	5. Bar: Dividido por días.
 	6. Composite-Line: Aging VS Birth.
 	7. Composite-Bar: Aging VS Birth.
-	8. Table: Date, Id, Name, Aging o Birth
-	
+	8. Table: Date, Id, Name, Sigue
+El tipo pie, se puede diferenciar en dos tipos(tarta o donuts).
+El tipo composite solo es válido cuando se usa para line o bar, pero sólo si se usa entre ellas, es decir, line con line o bar con bar, pero nunca mezcladas,
+en la parte de line, se puede elegir el tipo de line(continua, discontinua). Para componer varias se usa de la siguiente manera:
+	example1
+		.compose([
+			dc.lineChart(example1)
+				.dimension(lineDim)
+				.colors('red')
+				.group(lineGrp, "Birth")
+				.dashStyle([0,0]),
+			dc.lineChart(example1)
+				.dimension(lineDim2)
+				.colors('blue')
+				.group(lineGrp2, "Aging")
+				.dashStyle([1,2])
+		])
+		
+	example2
+		.compose([
+			dc.barChart(example2)
+				.dimension(barDim)
+				.colors('red')
+				.group(barGrp, 'Birth')
+				.centerBar(true)
+				.barPadding(0.2),
+
+			dc.barChart(example2)
+				.dimension(barDim)
+				.colors('blue')
+				.group(barGrp2, 'Aging')
+				.centerBar(true)
+				.barPadding(0.3)
+		])
+El tipo line tiene también su propio compose, que es .stack() si queremos añadir un nuevo elemento.
+Es recomendable si tenemos un archivo json grande no pintar todos los datos en la tabla para no colapsar el navegador.
+
 Prototipo3:
-Uso de las bibliotecas c3, d3, crossfilter con los archivos json: its_demographic_aging.json y its_demographic_birth.json.
+Uso de las bibliotecas NVD3, d3, crossfilter con los archivos json: its_demographic_aging.json y its_demographic_birth.json.
+En un primer intento para juntar NVD3 con crossfilter no ha sido fácil, ya que cada tipo de chart necesita un formato diferente, 
+que se pueden clasificar en dos(pie, resto).
+Los de tipo pie es igual que en dc.js, pero a cada objeto le corresponde un elemento.
+Los del resto(bar, line):
+	[
+		{"key": "stream1", "values": [{"x": 1, "y": 0.34234},{"x": 2, "y": 1.12312}]},
+		{"key": "stream2", "values": [{"x": 1, "y": 0.45634},{"x": 2, "y": 2.34234}]},
+		{"key": "stream3", "values": [{"x": 1, "y": 1.45634},{"x": 2, "y": 0.65423}]}
+	]
+Cada vez que quieras crear una gráfica necesitas masajear los datos primero, resulta imposible usar crossfilter para que todas las gráficas interactuen,
+ya que cada una de las gráficas necesitaría masajear de diferente manera, porque en cada gráfica queremos mostrar diferentes datos.
+El json que usamos para este prototipo es demasiado pesado para esta biblioteca.
+
+Prototipo4:
+Uso de las bibliotescas C3, d3, crossfilter con los archivos json: its_demographic_aging.json y its_demographic_birth.json.

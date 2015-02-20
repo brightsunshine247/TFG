@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>QZ DashBoard</title>
+
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
+	<link href="nv.d3.css" rel="stylesheet" type="text/css">
+
+    <style type="text/css">
+      body {
+        padding-top: 43px;
+      }
+      .statement_para {
+          font-size: 14pt;
+          line-height: 120%;
+          width: 60%;
+          text-align: justify;
+          text-justify: distribute;
+          margin: 10px auto;
+          margin-bottom: 30px;
+      }
+
+      .row {
+        margin 1%;
+      }
+
+      article {
+        padding: 0 1%;
+        font-size: 18px;
+        line-height: 1.5em;
+      }
+
+      body > .container {
+        width: 941px;
+      }
+
+      @media(min-width: 1200px){
+        body > .container {
+          width: 1171px;
+        }
+      }
+
+      @media (max-width: 979px) and (min-width: 768px) {
+        body > .container {
+          width: 725px;
+        }
+      }
+
+    </style>
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+	<script type="text/javascript" src="d3.v3.js"></script>
+    <script type="text/javascript" src="nv.d3.js"></script>
+    <script type="text/javascript" src="stream_layers.js"></script>
+    <script type="text/javascript" src="../js/colorbrewer.js"></script>
+	<script type="text/javascript" src="../js/crossfilter.js"></script>
+
+    <script type="text/javascript" src="prueba.js"></script>
+</head>
+<body>
+
+	<div class="span6">
+		<svg id="mainExample" style="height:360px;"></svg>
+	</div>
+
+
+	<div class="row">
+		<div class="span4">
+			<svg id="exampleOne" style="height:240px"></svg>
+		</div>
+		<div class="span4">
+			<svg id="exampleTwo" style="height:240px"></svg>
+		</div>
+		<div class="span4">
+			<svg id="exampleThree" style="height:240px"></svg>
+		</div>
+	</div>
+	<div>
+		<svg id="test1"></scg>
+	</div>
+</body>
+</html>

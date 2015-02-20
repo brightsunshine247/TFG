@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>QZ DashBoard</title>
+
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
+	<link href="nv.d3.css" rel="stylesheet" type="text/css">
+
+    <style>
+        text {
+            font: 12px sans-serif;
+        }
+        svg {
+            display: block;
+        }
+        html, body, #chart1, #uno {
+            margin: 0px;
+            padding: 0px;
+            height: 100%;
+            width: 100%;
+        }
+		body {
+		  overflow-y:scroll;
+		}
+    </style>
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+	<script src="d3.v3.js" charset="utf-8"></script>
+    <script type="text/javascript" src="nv.d3.js"></script>
+    <script type="text/javascript" src="stream_layers.js"></script>
+    <script type="text/javascript" src="../js/colorbrewer.js"></script>
+	<script type="text/javascript" src="../js/crossfilter.js"></script>
+
+    <script type="text/javascript" src="index.js"></script>
+</head>
+<body>
+
+<div id="chart1" >
+    <svg id="uno"></svg>
+</div>
+<div id="pie">
+	<svg id="test1" class="mypiechart"></svg>
+	<svg id="test2" class="mypiechart"></svg>
+</div>
+<div id="chart">
+	<svg style="height: 500px; width: 100%; margin-bottom: 50px"></svg>
+</div>
+</body>
+</html>
