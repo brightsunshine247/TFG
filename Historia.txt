@@ -24,32 +24,15 @@ Las gráficas hechas en este prototipo han sido:
 	7. Composite-Bar: Aging VS Birth.
 	8. Table: Date, Id, Name, Sigue
 El tipo pie, se puede diferenciar en dos tipos(tarta o donuts).
-El tipo composite solo es válido cuando se usa para line o bar, pero sólo si se usa entre ellas, es decir, line con line o bar con bar, pero nunca mezcladas,
-en la parte de line, se puede elegir el tipo de line(continua, discontinua). Para componer varias se usa de la siguiente manera:
-	example1
+El tipo composite solo es válido cuando se usa para line o bar, se puede elegir el tipo de line(continua, discontinua). Para componer varias se usa de la siguiente manera:
+	example
 		.compose([
-			dc.lineChart(example1)
+			dc.lineChart(example)
 				.dimension(lineDim)
 				.colors('red')
 				.group(lineGrp, "Birth")
 				.dashStyle([0,0]),
-			dc.lineChart(example1)
-				.dimension(lineDim2)
-				.colors('blue')
-				.group(lineGrp2, "Aging")
-				.dashStyle([1,2])
-		])
-		
-	example2
-		.compose([
-			dc.barChart(example2)
-				.dimension(barDim)
-				.colors('red')
-				.group(barGrp, 'Birth')
-				.centerBar(true)
-				.barPadding(0.2),
-
-			dc.barChart(example2)
+			dc.barChart(example)
 				.dimension(barDim)
 				.colors('blue')
 				.group(barGrp2, 'Aging')
@@ -63,16 +46,85 @@ Prototipo3:
 Uso de las bibliotecas NVD3, d3, crossfilter con los archivos json: its_demographic_aging.json y its_demographic_birth.json.
 En un primer intento para juntar NVD3 con crossfilter no ha sido fácil, ya que cada tipo de chart necesita un formato diferente, 
 que se pueden clasificar en dos(pie, resto).
-Los de tipo pie es igual que en dc.js, pero a cada objeto le corresponde un elemento.
+Los de tipo pie es muy similar al dc.js:
+	[
+		{
+			key: "One", 
+			y: 5
+		},
+		{
+			key: "Two", 
+			y: 2
+		},
+		{
+			key: "Three", 
+			y: 9
+		}
+	]
 Los del resto(bar, line):
 	[
-		{"key": "stream1", "values": [{"x": 1, "y": 0.34234},{"x": 2, "y": 1.12312}]},
-		{"key": "stream2", "values": [{"x": 1, "y": 0.45634},{"x": 2, "y": 2.34234}]},
-		{"key": "stream3", "values": [{"x": 1, "y": 1.45634},{"x": 2, "y": 0.65423}]}
+		{
+			key: "stream1", 
+			values: [
+				{x: 1, y: 0.34234},
+				{x: 2, y: 1.12312}
+			]
+		},
+		{
+			key: "stream2", 
+			values: [
+				{x: 1, y: 0.45634},
+				{x: 2, y: 2.34234}
+			]
+		},
+		{
+			key: "stream3", 
+			values: [
+				{x: 1, y: 1.45634},
+				{x: 2, y: 0.65423}
+			]
+		}
 	]
-Cada vez que quieras crear una gráfica necesitas masajear los datos primero, resulta imposible usar crossfilter para que todas las gráficas interactuen,
-ya que cada una de las gráficas necesitaría masajear de diferente manera, porque en cada gráfica queremos mostrar diferentes datos.
-El json que usamos para este prototipo es demasiado pesado para esta biblioteca.
+Con las funciones de evento podemos cambiar las funciones por defecto como por ejemplo:
+	chart.legend.dispatch.on('legendClick', function(e) { --> Cuando hacemos click en una de las legendas. El parámetro e es el valor que hemos hecho click
+		setTimeout(function() { --> La función que queramos que haga
+			
+        }, 100); --> Tiempo
+	});
+	chart.multibar.dispatch.on('elementClick', function(e) {}); --> Cuando hacemos click por ejemplo en una de las barras, ya que hemos cogido de ejemplo el multibar.
+
+Aunque no se filtran todas las gráficas a la vez como lo hace dc.js, hay que incluir las funciones de evento y actualizar las gráficas.
+Las gráficas hechas en este prototipo son las siguientes:
+	1. MultiBar: Year
+	2. Line: Month
+	3. 
+	4. Pie: Still VS No Still Sum
+	5. MultiBarHorizontal: Still VS No Still
 
 Prototipo4:
 Uso de las bibliotescas C3, d3, crossfilter con los archivos json: its_demographic_aging.json y its_demographic_birth.json.
+Para poder usar la biblioteca c3 tenemos que masajear los datos de la siguiente manera:
+	data: {
+		columns: [
+			['data1', 30, 200, 100, 400, 150, 250],
+			['data2', 50, 20, 10, 40, 15, 25]
+		],
+		axes: {
+			data1: 'y',
+			data2: 'y2',
+		}
+	}
+Como en NvD3 también tiene la función de setTimeout:
+	Para añadir o cambiar un dato
+	setTimeout(function () {
+		chart.load({
+			columns: [
+				['data3', 130, -150, 200, 300, -200, 100]
+			]
+		});
+	}, 1000);
+	
+	Para transformar de un tipo a otro
+	setTimeout(function () {
+		chart.transform('donut');
+	}, 1000);

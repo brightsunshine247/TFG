@@ -8,6 +8,7 @@ $(document).ready(function(){
 	var yearChart = dc.pieChart('#year');
     var lineCharts = dc.compositeChart('#monthly-move-chart');
 	var combined = dc.compositeChart('#combine');
+	var subRowChart = dc.barChart('#subRow');
     $.when(
 		// Load agin json file
         $.getJSON('its-demographics-aging.json', function (data) {
@@ -29,7 +30,7 @@ $(document).ready(function(){
             d.day = 16469-d.age;
             d.date = dateFormat.parse(dateFormat(new Date(1970, 0, d.day)));
         });
-        //Donuts
+        //-------------------------------- Donuts ------------------------------------
         var quarterDim = ndx.dimension(function(d) {
             return d.date.getMonth()+1;
         });
@@ -43,7 +44,7 @@ $(document).ready(function(){
             .dimension(quarterDim)
             .group(quarterGrp);
 
-        // Bar
+        //--------------------------------- Bar --------------------------------------
         var barDim = ndx.dimension(function(d) {
             return (d.date.getDay());
         });
@@ -68,7 +69,7 @@ $(document).ready(function(){
         barChart.xAxis().tickFormat(function(d) {return d});
         barChart.yAxis().ticks(15);
 
-        // Row
+        //----------------------------------- Row -------------------------------------------
 		var axisY = [];
 		var rowDim = ndx.dimension(function(d){
 			var i = Math.floor(d.age/181);
@@ -78,6 +79,7 @@ $(document).ready(function(){
 		var rowGrp = rowDim.group();
 		rowChart
 			.width(700).height(500)
+			.margins({top: 0, right: 50, bottom: 20, left: 40})
 			.elasticX(true)
 			.dimension(rowDim)
 			.group(rowGrp)
@@ -86,7 +88,26 @@ $(document).ready(function(){
 				return -d.key.split('-')[0];
 			})
 
-		// Pie per Year
+		//-------------------------------------- Bar subchart --------------------------------
+		var axisYear = [];
+		var subDim = ndx.dimension(function(d) {
+			var i = d.date.getFullYear()-2001;
+			axisYear[i] = d.date.getFullYear();
+            return d.date.getFullYear();
+        }).dispose();
+		var subGrp = subDim.group();
+		subRowChart
+			.width(700)
+			.height(100)
+		//	.margins({top: 0, right: 50, bottom: 20, left: 40})
+			.dimension(subDim)
+			.group(subGrp)
+			.centerBar(true)
+			.gap(1)
+			.x(d3.scale.linear().domain([2001, 2015]))
+			.alwaysUseRounding(true)
+			
+		//---------------------------------------- Pie per Year -----------------------------
 		var yearDim = ndx.dimension(function(d) {
             return d.date.getFullYear();
         });
@@ -111,7 +132,7 @@ $(document).ready(function(){
                 all:'All records selected. Please click on the graph to apply filters.'
             });
 
-        // Tabla
+        //--------------------------------------- Tabla -------------------------------------------------------------
         var dateDimension = ndx.dimension(function (d) {
             return d.dd;
         });
@@ -153,7 +174,7 @@ $(document).ready(function(){
                 table.selectAll('.dc-table-group').classed('info', true);
             });
 
-        // Line
+        //------------------------------------------------ Line ----------------------------------------------
 		
         var lineDim = ndx.dimension(function (d) {
             return d.age;
@@ -167,21 +188,6 @@ $(document).ready(function(){
 		var lineGrp2 = lineDim.group().reduceSum(function (d){
 			return d.nosigue;
 		})
-		/*
-		var mes = [];
-		var i = 1;
-		var j = 0;
-		var lineGrp2 = lineDim2.group().reduceSum(function (d){
-			if (i == 31){
-				i = 1;
-				j += 1;
-				mes[j] = d.sigue;
-			}else{
-				mes[j] += d.sigue; 
-				i += 1;
-			}
-			return mes[j];
-		})*/
         lineCharts
             .width(1000)
             .height(350)
@@ -210,7 +216,7 @@ $(document).ready(function(){
 					.dashStyle([1,2])
             ])
 
-        // Gain and Lost
+        //-------------------------------------------------------- Gain and Lost ----------------------------------------------
         var gainOrLoss = ndx.dimension(function (d) {
             return d.nosigue > d.sigue ?  'No': 'Si';
         });
@@ -221,9 +227,18 @@ $(document).ready(function(){
             .radius(80) // define pie radius
             .dimension(gainOrLoss) // set dimension
             .group(gainOrLossGroup)
-
+			.label(function (d) {
+				if (gainOrLossChart.hasFilter() && !gainOrLossChart.hasFilter(d.key)) {
+					return d.key + '(0%)';
+				}
+				var label = d.key;
+				if (all.value()) {
+					label += '(' + Math.floor(d.value / all.value() * 100) + '%)';
+				}
+				return label;
+			})
 		
-		// Bar combine
+		//---------------------------------------------- Bar combine -------------------------------------------
 		var combDim = ndx.dimension(function (d) {
 			var i = Math.floor(d.age/181);
 			return axisY[i];
@@ -272,7 +287,7 @@ $(document).ready(function(){
         dc.renderAll();
     });
 });
-// Valid format for dc.js
+//--------------------------------------- Valid format for dc.js ----------------------------------------
 function dcFormat(d){
     var array = [];
     var keys = [];
@@ -290,7 +305,7 @@ function dcFormat(d){
     }
     return array;
 }
-// Combine two JSON file(Birth, Aging) into one
+//--------------------------------------------- Combine two JSON file(Birth, Aging) into one ----------------------
 function birAgin(d1, d2){
 	var value1 = [];
 	var value2 = [];
