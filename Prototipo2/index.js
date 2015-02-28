@@ -87,6 +87,7 @@ $(document).ready(function(){
 			.ordering(function(d) {
 				return -d.key.split('-')[0];
 			})
+			.title(function(d) { return d.key+' -> '+d.value})
 
 		//-------------------------------------- Bar subchart --------------------------------
 		var axisYear = [];
@@ -106,6 +107,7 @@ $(document).ready(function(){
 			.gap(1)
 			.x(d3.scale.linear().domain([2001, 2015]))
 			.alwaysUseRounding(true)
+			
 			
 		//---------------------------------------- Pie per Year -----------------------------
 		var yearDim = ndx.dimension(function(d) {

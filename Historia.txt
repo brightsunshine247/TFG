@@ -1,6 +1,11 @@
 Herramientas:
 JavaScript, JQuery, HMTL5, CSS3, dc, nvd3, c3, d3, crosfillter, bootstrap, json.
 
+Prototipo0:
+En el repositorio https://www.github.com/zhquan/qz-dashboard.git
+Usando las bibliotecas HMLT5, CSS3, bootstrap, HighChart y ChartJs.
+
+
 Prototipo1:
 Esta es la fase de aprendizaje, donde experimento las bibliotecas de dc, d3 y crossfilter.
 Es un demo donde represento las gráficas con dc.js usando crossfillter con un fichero json.
@@ -128,3 +133,4 @@ Como en NvD3 también tiene la función de setTimeout:
 	setTimeout(function () {
 		chart.transform('donut');
 	}, 1000);
+En c3.js si no ponemos en que div lo queremos pintar nuestra gráfica, por defecto nos la pone en '#chart'

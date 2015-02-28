@@ -9,21 +9,86 @@ $(document).ready(function(){
             birth = data;
         })
     ).done(function(){
-		var datas = birAgin(birth['persons'], aging['persons']);
-        var dc = dcFormat(datas);
-		var ndx = crossfilter(dc);
+		var data = birAgin(birth['persons'], aging['persons']);
+        var cf = cfFormat(data);
+		var ndx = crossfilter(cf);
 		var dateFormat = d3.time.format('%Y-%m-%dT%H:%M:%S');
-        dc.forEach(function (d) {
+        cf.forEach(function (d) {
             d.one = 1; // value 1 for each data
             d.dd = dateFormat.parse(birth['date']);
             d.day = 16469-d.age;
             d.date = dateFormat.parse(dateFormat(new Date(1970, 0, d.day)));
         });
-		
-		
-		
-		
-		
+		//------------------------------------ YEAR BAR -----------------------------------------
+		var year = ndx;
+		year.dim = ndx.dimension(function(d) {
+			return d.date.getFullYear();
+		});
+		year.grp = year.dim.group().reduceSum(function(d) {
+			return d.one;
+		});
+		var year_data = c3Format('year', year);
+		var chart = c3.generate({
+			data: {
+				x: 'x',
+				columns: year_data,
+				type: 'bar',
+				onclick: function (d, i) {
+					var i = year_data[0].indexOf(d.x.getFullYear()+'-01-01');
+					year_data[0].splice(i, 1);
+					year_data[1].splice(i, 1);
+					chart.load({
+						columns:year_data,
+						type: 'bar'
+					});
+				}
+			},
+			axis: {
+				x: {
+					type: 'timeseries',
+					tick: {
+						count: year_data[0].length-1,
+						format: '%Y'
+					}
+				}
+			},
+			subchart: {
+				show: true
+			},
+			size: {
+				height: 400,
+				width: 600
+			},
+			bindto: d3.select('#year')
+		});
+		// --------------------------------------------- MONTH PIE -----------------------------------
+		var month = ndx;
+		month.dim = ndx.dimension(function(d) {
+            return d.date.getMonth()+1;
+        });
+        month.grp = month.dim.group().reduceSum(function(d) {
+            return d.one;
+        });
+		var month_data = c3Format('month', month);
+		var chart_month = c3.generate({
+			data: {
+				columns: month_data,
+				type : 'pie',
+				onclick: function (d, i) { console.log("onclick", d, i); chart.toggle(d.id)},
+				onmouseover: function (d, i) { console.log("onmouseover", d, i); },
+				onmouseout: function (d, i) { console.log("onmouseout", d, i); }
+			},
+			size: {
+				height: 400,
+				width: 600
+			},
+			legend: {
+				item: {
+					onclick: function (d) {console.log(d); chart.toggle(d)}
+				}
+			},
+			bindto: d3.select('#month')
+		});
 		/*var chart = c3.generate({
 			data: {
 				columns: [
@@ -66,7 +131,7 @@ $(document).ready(function(){
 	});
 });
 // Valid format for dc.js
-function dcFormat(d){
+function cfFormat(d){
     var array = [];
     var keys = [];
     var value = [];
@@ -108,22 +173,52 @@ function c3Format(type, d){
 	}else{
 		var data = d.grp.top(Infinity);
 		if (type == 'year'){
+			var x = ['x'];
+			var year = ['year'];
 			$.each(data, function(index, d){
-				var i = d.key - 2001;
-				values[i] = {x: d.key, y: d.value};
+				var i = d.key - 2000;
+				x[i] = d.key+'-01-01';
+				year[i] = d.value;
 			});
-			result.push({key: 'Year', values: values});
+			result.push(x);
+			result.push(year);
+			//result.push({key: 'Year', values: values});
 		}else if (type == 'month'){
+			console.log(data);
 			$.each(data, function(index, d){
-				values[d.key-1] = {x: d.key, y: d.value};
+				if (d.key == 1){
+					result[d.key-1] = ['january', d.value];
+				}else if (d.key == 2){
+					result[d.key-1] = ['february', d.value];
+				}else if (d.key == 3){
+					result[d.key-1] = ['march', d.value];
+				}else if (d.key == 4){
+					result[d.key-1] = ['april', d.value];
+				}else if (d.key == 5){
+					result[d.key-1] = ['may', d.value];
+				}else if (d.key == 6){
+					result[d.key-1] = ['june', d.value];
+				}else if (d.key == 7){
+					result[d.key-1] = ['july', d.value];
+				}else if (d.key == 8){
+					result[d.key-1] = ['august', d.value];
+				}else if (d.key == 9){
+					result[d.key-1] = ['september', d.value];
+				}else if (d.key == 10){
+					result[d.key-1] = ['october', d.value];
+				}else if (d.key == 11){
+					result[d.key-1] = ['november', d.value];
+				}else if (d.key == 12){
+					result[d.key-1] = ['december', d.value];
+				}
 			});
-			result.push({key: 'Month', values: values});
 		}else if (type == 'YoN'){
 			$.each(data, function(index, d){
 				result[index] = {key: d.key, y: d.value};
 			});
 		}
 	}
+	console.log(result)
     return result;
 }
 // Combine two JSON file into one

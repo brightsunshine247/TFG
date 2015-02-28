@@ -10,7 +10,7 @@ $(document).ready(function(){
         })
     ).done(function(){
 		var datas = birAgin(birth['persons'], aging['persons']);
-        var dc = dcFormat(datas);
+        var dc = cfFormat(datas);
 		var ndx = crossfilter(dc);
 		var dateFormat = d3.time.format('%Y-%m-%dT%H:%M:%S');
         dc.forEach(function (d) {
@@ -134,7 +134,7 @@ $(document).ready(function(){
 			});
 			demograB.grp = demograB.dim.group();
 			
-			var dcA = dcFormat(aging['persons']);
+			var dcA = cfFormat(aging['persons']);
 			var demograA = crossfilter(dcA);
 			demograA.dim = demograA.dimension(function(d){
 				var i = Math.floor(d.age/181);
@@ -171,35 +171,6 @@ $(document).ready(function(){
 					test1.update();
 				}, 100);
 			});
-			/*
-			var chart = nv.models.stackedAreaChart()
-                .margin({top: 10, bottom: 30, left: 40, right: 10})
-                .showControls(false)
-                .showLegend(false)
-                .useInteractiveGuideline(true)
-                .style('stream');
-
-			chart.yAxis
-				.showMaxMin(false)
-				.tickFormat(d3.format(',.1f'));
-
-			d3.select("#exampleTwo")
-				.datum(test_data)
-				.transition().duration(500).call(chart);
-
-			nv.utils.windowResize(chart.update);
-
-
-			chart.stacked.dispatch.on('areaClick.updateExamples', function(e) {
-				setTimeout(function() {
-					mainExample.update();
-					exampleOne.update();
-					//exampleTwo.update();
-					exampleThree.update();
-					test1.update();
-				}, 100);
-			})
-			*/
 			exampleTwo = chart;
 
 			return chart;
@@ -296,8 +267,8 @@ $(document).ready(function(){
 		});
 	});
 });
-// Valid format for dc.js
-function dcFormat(d){
+// Valid format for crossfilter.js
+function cfFormat(d){
     var array = [];
     var keys = [];
     var value = [];
