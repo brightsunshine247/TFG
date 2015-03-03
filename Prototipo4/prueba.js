@@ -38,8 +38,8 @@ $(document).ready(function(){
 					year_data[0].splice(i, 1);
 					year_data[1].splice(i, 1);
 					chart.load({
-						columns:year_data,
-						type: 'bar'
+						columns: year_data,
+						type: 'line'
 					});
 				}
 			},
@@ -84,7 +84,10 @@ $(document).ready(function(){
 			},
 			legend: {
 				item: {
-					onclick: function (d) {console.log(d); chart.toggle(d)}
+					onclick: function (d) {
+						console.log(d); 
+						chart.toggle(d)
+					}
 				}
 			},
 			bindto: d3.select('#month')

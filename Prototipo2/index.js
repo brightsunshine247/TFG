@@ -9,6 +9,7 @@ $(document).ready(function(){
     var lineCharts = dc.compositeChart('#monthly-move-chart');
 	var combined = dc.compositeChart('#combine');
 	var subRowChart = dc.barChart('#subRow');
+	var table = dc.dataTable('.dc-data-table');
     $.when(
 		// Load agin json file
         $.getJSON('its-demographics-aging.json', function (data) {
@@ -27,7 +28,8 @@ $(document).ready(function(){
         data.forEach(function (d) {
             d.one = 1; // value 1 for each data
             d.dd = dateFormat.parse(birth['date']);
-            d.day = 16469-d.age;
+			d.currentDay = ((new Date(d.dd.getFullYear(), d.dd.getMonth(), d.dd.getDay())-new Date(1970, 0, 1))/(1000*60*60*24))+1;
+            d.day = d.currentDay - d.age;
             d.date = dateFormat.parse(dateFormat(new Date(1970, 0, d.day)));
         });
         //-------------------------------- Donuts ------------------------------------
@@ -106,8 +108,8 @@ $(document).ready(function(){
 			.centerBar(true)
 			.gap(1)
 			.x(d3.scale.linear().domain([2001, 2015]))
-			.alwaysUseRounding(true)
-			
+			.alwaysUseRounding(true);
+
 			
 		//---------------------------------------- Pie per Year -----------------------------
 		var yearDim = ndx.dimension(function(d) {
@@ -123,7 +125,6 @@ $(document).ready(function(){
             .dimension(yearDim)
             .group(yearGrp);
 
-
 			
         dc.dataCount('.dc-data-count')
             .dimension(ndx)
@@ -138,7 +139,7 @@ $(document).ready(function(){
         var dateDimension = ndx.dimension(function (d) {
             return d.dd;
         });
-        dc.dataTable('.dc-data-table')
+        table
             .dimension(dateDimension)
             .group(function (d) {
                 var format = d3.format('02d');
@@ -167,15 +168,18 @@ $(document).ready(function(){
 				}
 				
             ])
-
             .sortBy(function (d) {
                 return d.dd;
             })
-            .order(d3.ascending)
-            .renderlet(function (table) {
-                table.selectAll('.dc-table-group').classed('info', true);
-            });
-
+            .order(d3.ascending);
+            /*.renderlet(function (table) {
+                
+            });*/
+		table.on('renderlet', function(table) {
+			table.selectAll('.dc-table-group').classed('info', true);
+			table.selectAll(".dc-table-row").on("click", function(d){selection(d.date, d.id, d.name, d.sigue)});
+		});
+		
         //------------------------------------------------ Line ----------------------------------------------
 		
         var lineDim = ndx.dimension(function (d) {
@@ -317,7 +321,6 @@ function birAgin(d1, d2){
 		if (key == 'id'){
 			value1.push(val);
 		}
-		
 	});
 	$.each(d2, function(key, val){
 		if (key == 'id'){
@@ -337,4 +340,8 @@ function birAgin(d1, d2){
 	d1['sigue'] = sigue;
 	d1['nosigue'] = nosigue;
 	return d1
+}
+//------------------------------------------------- Selection on the table -------------------------------------
+function selection(date, id, name, still){
+	alert(date+' '+id+' '+name+' '+still);
 }

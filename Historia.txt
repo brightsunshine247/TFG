@@ -46,7 +46,11 @@ El tipo composite solo es válido cuando se usa para line o bar, se puede elegir
 		])
 El tipo line tiene también su propio compose, que es .stack() si queremos añadir un nuevo elemento.
 Es recomendable si tenemos un archivo json grande no pintar todos los datos en la tabla para no colapsar el navegador.
-
+Para poder hacer click en dataTable o barChart tenemos que usar las siguientes funciones:
+	chart.on('renderlet', function(_chart) {
+		_chart.selectAll(".dc-table-row").on("click", function(d){...});
+	});
+	
 Prototipo3:
 Uso de las bibliotecas NVD3, d3, crossfilter con los archivos json: its_demographic_aging.json y its_demographic_birth.json.
 En un primer intento para juntar NVD3 con crossfilter no ha sido fácil, ya que cada tipo de chart necesita un formato diferente, 
@@ -134,3 +138,6 @@ Como en NvD3 también tiene la función de setTimeout:
 		chart.transform('donut');
 	}, 1000);
 En c3.js si no ponemos en que div lo queremos pintar nuestra gráfica, por defecto nos la pone en '#chart'
+
+No se puede de momento hacer lo que dice barahona porque al capturar un evento te dice el total pero no está especificado, 
+	ejemplo Key = 2002, value = 300 no tienes forma de saber de esas 300 los datos específicos. 
