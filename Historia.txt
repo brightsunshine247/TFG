@@ -138,6 +138,5 @@ Como en NvD3 también tiene la función de setTimeout:
 		chart.transform('donut');
 	}, 1000);
 En c3.js si no ponemos en que div lo queremos pintar nuestra gráfica, por defecto nos la pone en '#chart'
-
-No se puede de momento hacer lo que dice barahona porque al capturar un evento te dice el total pero no está especificado, 
-	ejemplo Key = 2002, value = 300 no tienes forma de saber de esas 300 los datos específicos. 
+Para hacer que todas las gráficas se cambien a la vez, tenemos que cambiar las gráficas una a una y la operación que se realiza es
+bastante lente comparado con la biblioteca dc.js ya que lo hace la propia biblioteca.
