@@ -6,7 +6,7 @@ $(document).ready(function(){
     var barChart = dc.barChart('#fluctuation-chart');
     var rowChart = dc.rowChart('#day-of-week-chart');
 	var yearChart = dc.pieChart('#year');
-//    var lineCharts = dc.compositeChart('#monthly-move-chart');
+    var tzCharts = dc.rowChart('#monthly-move-chart');
 	var compChart = dc.barChart('#combine');
 	var subRowChart = dc.barChart('#subRow');
 	var table = dc.dataTable('.dc-data-table');
@@ -183,6 +183,22 @@ $(document).ready(function(){
 		});
 		
         //------------------------------------------------ Line ----------------------------------------------
+	var tzDim = ndx.dimension(function(d) {
+            return d.TZ;
+        });
+        var tzGrp = tzDim.group().reduceSum(function(d) {
+            return d.one;
+        });
+        tzCharts.width(700).height(500)
+			.margins({top: 0, right: 50, bottom: 20, left: 40})
+			.elasticX(true)
+			.dimension(tzDim)
+			.group(tzGrp)
+			.elasticX(true)
+			.ordering(function(d) {
+				return d.key;
+			})
+			.title(function(d) { return d.key+' -> '+d.value})
 /*		
         var lineDim = ndx.dimension(function (d) {
             return d.age;

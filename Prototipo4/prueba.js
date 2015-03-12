@@ -30,46 +30,6 @@ $(document).ready(function(){
 		draw_monthPie(month_data, ndx);
 		var demo_data = demograph_data(ndx);
 		draw_demograph(demo_data, ndx);
-		
-		/*var chart = c3.generate({
-			data: {
-				columns: [
-					['data1', 30, 200, 100, 400, 150, 250],
-					['data2', 50, 20, 10, 40, 15, 25]
-				],
-				axes: {
-					data1: 'y',
-					data2: 'y2',
-				}
-			},
-			axis: {
-				x: {
-					label: 'X Label'
-				},
-				y: {
-					label: {
-						text: 'Y Axis Label',
-						position: 'outer-middle'
-					}
-				},
-				y2: {
-					show: true,
-					label: {
-						text: 'Y2 Axis Label',
-						position: 'outer-middle'
-					}
-				}
-			},
-			tooltip: {
-				enabled: true
-			},
-			zoom: {
-				enabled: true
-			},
-			subchart: {
-				show: true
-			}
-		});*/
 	});
 });
 //------------------------------------ YEAR BAR DATA -----------------------------------------
@@ -85,8 +45,8 @@ function yearBar_data(ndx){
 }
 // ------------------------------------- YEAR BAR DRAW -------------------------------------------------
 function draw_yearBar(year_data, ndx){
-	console.log('draw_yearBar')
-	console.log(year_data);
+console.log('draw_yearBar')
+console.log(year_data);
 	chart_year = c3.generate({
 		data: {
 			//x: 'x',
@@ -383,19 +343,6 @@ function draw_yearBar(year_data, ndx){
 		tooltip: {
 			grouped: false
 		},
-		/*axis: {
-			x: {
-				type: 'category',
-				tick: {
-					rotate: 0,
-					multiline: false
-				},
-				height: 130
-			}
-		},*/
-		/*subchart: {
-			show: true
-		},*/
 		size: {
 			height: 400,
 			width: 600
@@ -423,14 +370,12 @@ function draw_monthPie(month_data, ndx){
 			onclick: function (d, i) {
 				var aux = refresh(ndx, d.name, 'year_month');
 				//chart_month.toggle(d.name);
-console.log("year");
 				var new_data = c3Format('year',aux);
 				new_data.shift();
 				chart_year.load({
 					columns: new_data
 				});
 				var new_data_demograph = refresh(ndx, d.name, 'demograph_month');
-console.log("demograph")
 				var data_demograph = c3Format('demograph', new_data_demograph);
 				chart_demograph.load({
 					columns: data_demograph	
@@ -487,7 +432,7 @@ function draw_demograph(data, ndx){
 			columns: data,
 			type: 'bar',
 			onclick: function (d, i) {
-				console.log(d);
+console.log(d);
 			}
 		},
 		legend: {
@@ -541,10 +486,6 @@ function draw_demograph(data, ndx){
 				height: 130
 			}
 		},
-		/*
-		subchart: {
-			show: true
-		},*/
 		size: {
 			height: 400,
 			width: 600
@@ -591,16 +532,31 @@ function c3Format(type, d){
 		$.each(data2, function(index, d0){
 			var i = d0.key.split("-")[0]/181;
 			if (d0.key != "0"){
+				x[i+1] = d0.key;
 				d1[i+1] = d0.value;
 			}
-			
 		});
-		if (d1[1] == undefined){
-			d1[1] = 0;
+
+		for(var i=0; i<x.length; i++){
+			if (d1[i] == undefined){
+				d1[i] = 0;
+			}
+			if (x[1] == undefined){
+				x[1] = "0-181";
+			}else{
+				if (x[i] == undefined){
+					var val = (i-1)*181+'-'+(i+2)*181;
+					x[i] = val;
+				}
+			}
+			if (d2[i] == undefined){
+				d2[i] = 0;
+			}
 		}
 		result.push(x);
 		result.push(d1);
 		result.push(d2);
+console.log(result);
 	}else{
 		var data = d.top(Infinity);
 		
@@ -688,21 +644,7 @@ function birAgin(d1, d2){
 // Update data after click
 function refresh(data, selectData, opt){
 	var result;
-	/*data.forEach(function(d){
-		//console.log(d.date);
-		if (opt == 'monthPie'){
-			if (d.date.getMonth() == removeData){
-				//console.log(d);
-				var i = result.indexOf(d);
-				result.splice(i, 1);
-			}
-		} else if (opt = 'yearBar'){
-			if (d.date.getFullYear() == removeData){
-				var i = result.indexOf(d);
-				result.splice(i, 1);
-			}
-		}
-	});*/
+
 	if (opt == 'month_year'){
 		console.log('monthPie '+selectData);
 		var dim = data.dimension(function(d){
