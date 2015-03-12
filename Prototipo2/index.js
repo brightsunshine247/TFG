@@ -6,8 +6,8 @@ $(document).ready(function(){
     var barChart = dc.barChart('#fluctuation-chart');
     var rowChart = dc.rowChart('#day-of-week-chart');
 	var yearChart = dc.pieChart('#year');
-    var lineCharts = dc.compositeChart('#monthly-move-chart');
-	var combined = dc.compositeChart('#combine');
+//    var lineCharts = dc.compositeChart('#monthly-move-chart');
+	var compChart = dc.barChart('#combine');
 	var subRowChart = dc.barChart('#subRow');
 	var table = dc.dataTable('.dc-data-table');
     $.when(
@@ -157,15 +157,17 @@ $(document).ready(function(){
                 'id',
                 'name',
 				{
-					label: 'sigue',
+					label: 'still',
 					format: function (d) {
-						if (d.sigue == 1){
-							return 'SI';
+						if (d.still == 1){
+							return 'YES';
 						}else{
 							return 'NO';
 						};
 					}
-				}
+				},
+				'company',
+				'TZ'
 				
             ])
             .sortBy(function (d) {
@@ -181,7 +183,7 @@ $(document).ready(function(){
 		});
 		
         //------------------------------------------------ Line ----------------------------------------------
-		
+/*		
         var lineDim = ndx.dimension(function (d) {
             return d.age;
         });
@@ -221,10 +223,10 @@ $(document).ready(function(){
 					.group(lineGrp2, "Aging")
 					.dashStyle([1,2])
             ])
-
+*/
         //-------------------------------------------------------- Gain and Lost ----------------------------------------------
         var gainOrLoss = ndx.dimension(function (d) {
-            return d.nosigue > d.sigue ?  'No': 'Si';
+            return d.nostill > d.still ?  'No': 'Yes';
         });
         var gainOrLossGroup = gainOrLoss.group();
         gainOrLossChart
@@ -245,7 +247,24 @@ $(document).ready(function(){
 			})
 		
 		//---------------------------------------------- Bar combine -------------------------------------------
-		var combDim = ndx.dimension(function (d) {
+		var subDim = ndx.dimension(function(d) {
+			return d.company;
+        }).dispose();
+		var subGrp = subDim.group().reduceSum(function(d){
+			return d.one;
+		});
+		compChart
+			.width(700)
+			.height(100)
+			.margins({top: 0, right: 50, bottom: 20, left: 40})
+			.dimension(subDim)
+			.group(subGrp)
+			.centerBar(true)
+			.gap(1)
+			.x(d3.scale.linear().domain([0, 6]))
+			.elasticY(true)
+			.alwaysUseRounding(true);
+/*		var combDim = ndx.dimension(function (d) {
 			var i = Math.floor(d.age/181);
 			return axisY[i];
 		});
@@ -289,7 +308,7 @@ $(document).ready(function(){
 					.centerBar(true)
 					.barPadding(0.3)
 			])
-
+*/
         dc.renderAll();
     });
 });
@@ -317,6 +336,8 @@ function birAgin(d1, d2){
 	var value2 = [];
 	var sigue = [];
 	var nosigue = [];
+	var tz = [];
+	var company =  [];
 	$.each(d1, function(key, val){
 		if (key == 'id'){
 			value1.push(val);
@@ -328,6 +349,10 @@ function birAgin(d1, d2){
 		}
 	});
 	for (var i=0; i<value1[0].length; i++){
+		var TZ = Math.floor(Math.random() * (12 + 12) - 12);
+		tz.push(TZ);
+		var Company = Math.floor(Math.random()*7);
+		company.push(Company);
 		var yes = 0;
 		var no = 1;
 		if(value2[0].indexOf(value1[0][i]) != -1){
@@ -337,8 +362,10 @@ function birAgin(d1, d2){
 		sigue.push(yes);
 		nosigue.push(no);
 	}
-	d1['sigue'] = sigue;
-	d1['nosigue'] = nosigue;
+	d1['TZ'] = tz;
+	d1['company'] = company;
+	d1['still'] = sigue;
+	d1['nostill'] = nosigue;
 	return d1
 }
 //------------------------------------------------- Selection on the table -------------------------------------
