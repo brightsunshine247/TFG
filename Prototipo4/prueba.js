@@ -30,6 +30,7 @@ $(document).ready(function(){
 		draw_monthPie(month_data, ndx);
 		var demo_data = demograph_data(ndx);
 		draw_demograph(demo_data, ndx);
+console.log("FIN")
 	});
 });
 //------------------------------------ YEAR BAR DATA -----------------------------------------
@@ -380,8 +381,14 @@ function draw_monthPie(month_data, ndx){
 				chart_demograph.load({
 					columns: data_demograph	
 				});
+				var select = i.className.baseVal.toString().split("c3-arc-")[1];
+				console.log('select, '+select);
+				$('.c3-shape.c3-shape.c3-arc.c3-arc-'+select).css('opacity', 0.5); 
 			},
-			//onmouseover: function (d, i) { console.log("onmouseover", d, i); },
+			onmouseover: function (d, i) { 
+				console.log(i.className.baseVal.toString().replace(" ","."))
+				$('.c3-shape.c3-shape.c3-arc.c3-arc-march').css('opacity', 0.5); 
+			},
 			//onmouseout: function (d, i) { console.log("onmouseout", d, i); }
 		},
 		size: {
@@ -450,7 +457,6 @@ console.log(d);
 						// refresh chart_month
 						var new_data_month = refresh(ndx, "still", "month_demograph");
 						var new_month = c3Format('month', new_data_month);
-						console.log(new_year)
 						chart_month.load({
 							columns: new_month
 						});
@@ -466,7 +472,6 @@ console.log(d);
 						// refresh chart_month
 						var new_data_month = refresh(ndx, "nostill", "month_demograph");
 						var new_month = c3Format('month', new_data_month);
-						console.log(new_year)
 						chart_month.load({
 							columns: new_month
 						});
@@ -491,6 +496,7 @@ console.log(d);
 			width: 600
 		},
 		bindto: d3.select('#demograph')
+		
 	});
 }
 // ----------------------------------------------- CFFORMAT ------------------------------------
@@ -561,15 +567,6 @@ console.log(result);
 		var data = d.top(Infinity);
 		
 		if (type == 'year'){
-			/*var x = ['x'];
-			var year = ['year'];
-			$.each(data, function(index, d){
-				var i = d.key - 2000;
-				x[i] = d.key;
-				year[i] = d.value;
-			});
-			result.push(x);
-			result.push(year);*/
 			$.each(data, function(index, d){
 				result.push([d.key.toString(), d.value]);
 			});
@@ -788,4 +785,8 @@ function reset(){
 	chart_month.load({
 		columns: month_data
 	});
+	var demogra_data = demograph_data(originalNdx);
+	chart_demograph.load({
+		columns:demogra_data
+	})
 }

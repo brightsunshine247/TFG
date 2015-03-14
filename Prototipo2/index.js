@@ -23,15 +23,16 @@ $(document).ready(function(){
         datas = birAgin(birth['persons'], aging['persons']);
         data = dcFormat(datas);
         var ndx = crossfilter(data);
-        var all = ndx.groupAll();
-        var dateFormat = d3.time.format('%Y-%m-%dT%H:%M:%S');
+		var all = ndx.groupAll();
+		var dateFormat = d3.time.format('%Y-%m-%dT%H:%M:%S');
+		var format = dateFormat.parse(birth['date']);
+		var initDate = ((new Date(format.getFullYear(), format.getMonth(), format.getDay())-new Date(1970, 0, 1))/(1000*60*60*24))+1;
         data.forEach(function (d) {
-            d.one = 1; // value 1 for each data
-            d.dd = dateFormat.parse(birth['date']);
-			d.currentDay = ((new Date(d.dd.getFullYear(), d.dd.getMonth(), d.dd.getDay())-new Date(1970, 0, 1))/(1000*60*60*24))+1;
-            d.day = d.currentDay - d.age;
-            d.date = dateFormat.parse(dateFormat(new Date(1970, 0, d.day)));
-        });
+		    d.one = 1; // value 1 for each data
+	//            d.dd = dateFormat.parse(birth['date']);
+			d.day = initDate-d.age;
+		    d.date = dateFormat.parse(dateFormat(new Date(1970, 0, d.day)));
+		});
         //-------------------------------- Donuts ------------------------------------
         var quarterDim = ndx.dimension(function(d) {
             return d.date.getMonth()+1;
@@ -106,10 +107,22 @@ $(document).ready(function(){
 			.dimension(subDim)
 			.group(subGrp)
 			.centerBar(true)
+			.brushOn(false)
 			.gap(1)
 			.x(d3.scale.linear().domain([2001, 2015]))
 			.alwaysUseRounding(true);
-
+		subRowChart.on('renderlet', function(chart) {
+		  	chart.selectAll('rect').on("click", function(d) {
+				var date = ((new Date(d.x, 0, 0)-new Date(1970, 0, 0))/(1000*60*60*24));
+console.log(date);
+				data.forEach(function (d) {
+					d.day = date-d.age;
+					d.date = dateFormat.parse(dateFormat(new Date(1970, 0, d.day)));
+				});
+console.log(data);
+				dc.renderAll();
+		  	});
+		});
 			
 		//---------------------------------------- Pie per Year -----------------------------
 		var yearDim = ndx.dimension(function(d) {
@@ -137,7 +150,7 @@ $(document).ready(function(){
 
         //--------------------------------------- Tabla -------------------------------------------------------------
         var dateDimension = ndx.dimension(function (d) {
-            return d.dd;
+            return d.date;
         });
         table
             .dimension(dateDimension)
@@ -171,7 +184,7 @@ $(document).ready(function(){
 				
             ])
             .sortBy(function (d) {
-                return d.dd;
+                return d.date;
             })
             .order(d3.ascending);
             /*.renderlet(function (table) {
@@ -179,7 +192,7 @@ $(document).ready(function(){
             });*/
 		table.on('renderlet', function(table) {
 			table.selectAll('.dc-table-group').classed('info', true);
-			table.selectAll(".dc-table-row").on("click", function(d){selection(d.date, d.id, d.name, d.sigue)});
+			table.selectAll(".dc-table-row").on("click", function(d){selection(d.date, d.id, d.name, d.still, d.TZ, d.company)});
 		});
 		
         //------------------------------------------------ Line ----------------------------------------------
@@ -384,7 +397,23 @@ function birAgin(d1, d2){
 	d1['nostill'] = nosigue;
 	return d1
 }
+// ----------------------------------- close profile ---------------------------
+function closes(){
+	$('#profile').hide();
+}
 //------------------------------------------------- Selection on the table -------------------------------------
-function selection(date, id, name, still){
-	alert(date+' '+id+' '+name+' '+still);
+function selection(date, id, name, still, TZ, company){
+	var aux;
+	if (still == 0){
+		aux = "NO";
+	}else{
+		aux = "YES";
+	}
+	$('#profile').show();
+	$("#profile").html('Name: '+name+'   Id: '+id+'<br>company: '+company+' still: '+aux+'<br>date: '+date.toString().split("00:00")[0]+' TZ: '+TZ+'<br><button onclick="closes()">Close</button>');
+}
+// -------------------------------------- Add new property ---------------------
+function add_new_property(data, initDate){
+	
+    
 }

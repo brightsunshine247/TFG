@@ -1,0 +1,10 @@
+#profile{
+	position: fixed;
+	top: 50%;
+	left: 40%;
+	border: solid;
+	border-radius: 10px;
+	padding: 5px;
+	background-color: #D9EDF7;
+	box-shadow: 0px 0px 20px #5A5B63;
+}
