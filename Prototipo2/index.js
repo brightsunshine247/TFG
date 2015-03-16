@@ -8,7 +8,8 @@ $(document).ready(function(){
 	var yearChart = dc.pieChart('#year');
     var tzCharts = dc.rowChart('#monthly-move-chart');
 	var compChart = dc.barChart('#combine');
-	var subRowChart = dc.barChart('#subRow');
+//	var initDateChart = dc.barChart('#initDate');
+//	var finalDateChart = dc.barChart('#finalDate');
 	var table = dc.dataTable('.dc-data-table');
     $.when(
 		// Load agin json file
@@ -57,9 +58,10 @@ $(document).ready(function(){
             .width(600).height(500)
             .dimension(barDim)
             .group(barGrp)
-            .x(d3.scale.linear().domain([1,31]))
-			.elasticX(true)
-			.centerBar(false)
+            .x(d3.scale.linear().domain([0,32]))
+			.centerBar(true)
+//			.elasticX(true)
+			.centerBar(true)
 			.elasticY(true)
 			.brushOn(true)
 			.renderHorizontalGridLines(true)
@@ -93,14 +95,14 @@ $(document).ready(function(){
 			.title(function(d) { return d.key+' -> '+d.value})
 
 		//-------------------------------------- Bar subchart --------------------------------
-		var axisYear = [];
+/*		var axisYear = [];
 		var subDim = ndx.dimension(function(d) {
 			var i = d.date.getFullYear()-2001;
 			axisYear[i] = d.date.getFullYear();
             return d.date.getFullYear();
         }).dispose();
 		var subGrp = subDim.group();
-		subRowChart
+		initDateChart
 			.width(700)
 			.height(100)
 		//	.margins({top: 0, right: 50, bottom: 20, left: 40})
@@ -109,21 +111,40 @@ $(document).ready(function(){
 			.centerBar(true)
 			.brushOn(false)
 			.gap(1)
-			.x(d3.scale.linear().domain([2001, 2015]))
+			.x(d3.scale.linear().domain([2000, 2016]))
 			.alwaysUseRounding(true);
-		subRowChart.on('renderlet', function(chart) {
+		initDateChart.on('renderlet', function(chart) {
 		  	chart.selectAll('rect').on("click", function(d) {
 				var date = ((new Date(d.x, 0, 0)-new Date(1970, 0, 0))/(1000*60*60*24));
-console.log(date);
 				data.forEach(function (d) {
 					d.day = date-d.age;
 					d.date = dateFormat.parse(dateFormat(new Date(1970, 0, d.day)));
 				});
-console.log(data);
 				dc.renderAll();
 		  	});
 		});
-			
+		finalDateChart
+			.width(700)
+			.height(100)
+		//	.margins({top: 0, right: 50, bottom: 20, left: 40})
+			.dimension(subDim)
+			.group(subGrp)
+			.centerBar(true)
+			.brushOn(false)
+			.gap(1)
+			.x(d3.scale.linear().domain([2000, 2016]))
+			.alwaysUseRounding(true);
+		finalDateChart.on('renderlet', function(chart) {
+		  	chart.selectAll('rect').on("click", function(d) {
+				var date = ((new Date(d.x, 0, 0)-new Date(1970, 0, 0))/(1000*60*60*24));
+				data.forEach(function (d) {
+					d.day = date-d.age;
+					d.date = dateFormat.parse(dateFormat(new Date(1970, 0, d.day)));
+				});
+				dc.renderAll();
+		  	});
+		});
+*/			
 		//---------------------------------------- Pie per Year -----------------------------
 		var yearDim = ndx.dimension(function(d) {
             return d.date.getFullYear();
@@ -152,16 +173,17 @@ console.log(data);
         var dateDimension = ndx.dimension(function (d) {
             return d.date;
         });
+		
         table
             .dimension(dateDimension)
             .group(function (d) {
                 var format = d3.format('02d');
                 return d.date.getFullYear() + ' / ' + format((d.date.getMonth() + 1));
             })
-            .size(data.length/10)
+            .size(20)
             .columns([
                 {
-                    label: 'date', // desired format of column name 'Change' when used as a label with a function.
+                    label: 'Date', // desired format of column name 'Change' when used as a label with a function.
                     format: function (d) {
                         var formato = d3.format('02d');
 						return d.date.getFullYear() + ' / ' + formato((d.date.getMonth() + 1)) + ' / ' + formato(d.date.getDay());
@@ -170,7 +192,7 @@ console.log(data);
                 'id',
                 'name',
 				{
-					label: 'still',
+					label: 'Still',
 					format: function (d) {
 						if (d.still == 1){
 							return 'YES';
@@ -194,9 +216,29 @@ console.log(data);
 			table.selectAll('.dc-table-group').classed('info', true);
 			table.selectAll(".dc-table-row").on("click", function(d){selection(d.date, d.id, d.name, d.still, d.TZ, d.company)});
 		});
-		
+
+// ------------------------------------------- Table Search ---------------------------------------------
+		$("#table-search").on('input',function(){
+			var nameDimension = ndx.dimension(function (d){
+				return d.name;
+			});
+			text_filter(nameDimension,this.value);//companyDimension is the dimension for the data table
+
+			function text_filter(dim, q){
+				table.filterAll();
+				var re = new RegExp(q,"i")
+				if (q != '') {
+					dim.filter(function(d) {
+						return 0 == d.search(re);
+					});
+				} else {
+					dim.filterAll();
+				}
+				dc.redrawAll();
+			}
+		});
         //------------------------------------------------ Line ----------------------------------------------
-	var tzDim = ndx.dimension(function(d) {
+		var tzDim = ndx.dimension(function(d) {
             return d.TZ;
         });
         var tzGrp = tzDim.group().reduceSum(function(d) {
@@ -290,7 +332,7 @@ console.log(data);
 			.group(subGrp)
 			.centerBar(true)
 			.gap(1)
-			.x(d3.scale.linear().domain([0, 6]))
+			.x(d3.scale.linear().domain([-1, 7]))
 			.elasticY(true)
 			.alwaysUseRounding(true);
 /*		var combDim = ndx.dimension(function (d) {
@@ -378,7 +420,7 @@ function birAgin(d1, d2){
 		}
 	});
 	for (var i=0; i<value1[0].length; i++){
-		var TZ = Math.floor(Math.random() * (12 + 12) - 12);
+		var TZ = Math.floor(Math.random() * (13 + 12) - 12);
 		tz.push(TZ);
 		var Company = Math.floor(Math.random()*7);
 		company.push(Company);
@@ -398,7 +440,7 @@ function birAgin(d1, d2){
 	return d1
 }
 // ----------------------------------- close profile ---------------------------
-function closes(){
+function closeProfile(){
 	$('#profile').hide();
 }
 //------------------------------------------------- Selection on the table -------------------------------------
@@ -410,10 +452,7 @@ function selection(date, id, name, still, TZ, company){
 		aux = "YES";
 	}
 	$('#profile').show();
-	$("#profile").html('Name: '+name+'   Id: '+id+'<br>company: '+company+' still: '+aux+'<br>date: '+date.toString().split("00:00")[0]+' TZ: '+TZ+'<br><button onclick="closes()">Close</button>');
+	$("#profile").html('Name: '+name+' Id: '+id+'<br>Company: '+company+' Still: '+aux+'<br>Date: '+date.toString().split("00:00")[0]+' TZ: '+TZ+'<br><button onclick="closeProfile()">Close</button>');
 }
-// -------------------------------------- Add new property ---------------------
-function add_new_property(data, initDate){
-	
-    
-}
+// ----------------------------------- Table Search ------------------------------
+

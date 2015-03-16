@@ -5,7 +5,6 @@ Prototipo0:
 En el repositorio https://www.github.com/zhquan/qz-dashboard.git
 Usando las bibliotecas HMLT5, CSS3, bootstrap, HighChart y ChartJs.
 
-
 Prototipo1:
 Esta es la fase de aprendizaje, donde experimento las bibliotecas de dc, d3 y crossfilter.
 Es un demo donde represento las gráficas con dc.js usando crossfillter con un fichero json.
@@ -50,7 +49,10 @@ Para poder hacer click en dataTable o barChart tenemos que usar las siguientes f
 	chart.on('renderlet', function(_chart) {
 		_chart.selectAll(".dc-table-row").on("click", function(d){...});
 	});
-	
+En este aspecto es más complicado si lo comparamos con las bibliotecas de NVd3 o C3 que tienen el evento onclick.
+Y sólo se puede hacer el evento onclick en dataTable o barChart(.brushOn(false)) porque en el chart que se pinta tienen una clase que se llama "dc-table-row" para dateTable y "rect" para barChart que estan pintadas cada elemento del chart en esas clases y se puede
+hacer dicho evento. 
+
 Prototipo3:
 Uso de las bibliotecas NVD3, d3, crossfilter con los archivos json: its_demographic_aging.json y its_demographic_birth.json.
 En un primer intento para juntar NVD3 con crossfilter no ha sido fácil, ya que cada tipo de chart necesita un formato diferente, 
