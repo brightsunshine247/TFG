@@ -1,13 +1,13 @@
 var aging = {};
 var birth = {};
 $(document).ready(function(){
-    var gainOrLossChart = dc.pieChart('#gain-loss-chart');
-    var quarterChart = dc.pieChart('#quarter-chart');
-    var barChart = dc.barChart('#fluctuation-chart');
-    var rowChart = dc.rowChart('#day-of-week-chart');
-	var yearChart = dc.pieChart('#year');
-    var tzCharts = dc.rowChart('#monthly-move-chart');
-	var compChart = dc.barChart('#combine');
+    var stillNoStillChart = dc.pieChart('#still-nostill-chart');
+    var monthChart = dc.pieChart('#month-chart');
+    var dayChart = dc.barChart('#day-chart');
+    var demographChart = dc.rowChart('#demograph-chart');
+	var yearChart = dc.pieChart('#year-chart');
+    var tzCharts = dc.rowChart('#time-zone-chart');
+	var companyChart = dc.barChart('#company-chart');
 //	var initDateChart = dc.barChart('#initDate');
 //	var finalDateChart = dc.barChart('#finalDate');
 	var table = dc.dataTable('.dc-data-table');
@@ -34,30 +34,33 @@ $(document).ready(function(){
 			d.day = initDate-d.age;
 		    d.date = dateFormat.parse(dateFormat(new Date(1970, 0, d.day)));
 		});
-        //-------------------------------- Donuts ------------------------------------
-        var quarterDim = ndx.dimension(function(d) {
+//---------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------- Pie (Donuts) Month ----------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
+        var monthDim = ndx.dimension(function(d) {
             return d.date.getMonth()+1;
         });
-        var quarterGrp = quarterDim.group().reduceSum(function(d) {
+        var monthGrp = monthDim.group().reduceSum(function(d) {
             return d.one;
         });
-        quarterChart.width(180)
+        monthChart.width(180)
             .height(180)
             .radius(80)
             .innerRadius(30)
-            .dimension(quarterDim)
-            .group(quarterGrp);
-
-        //--------------------------------- Bar --------------------------------------
-        var barDim = ndx.dimension(function(d) {
+            .dimension(monthDim)
+            .group(monthGrp);
+//---------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------- Pie (Donuts) Month -----------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
+        var dayDim = ndx.dimension(function(d) {
             return (d.date.getDay());
         });
-        var barGrp = barDim.group();
+        var dayGrp = dayDim.group();
 
-        barChart
+        dayChart
             .width(600).height(500)
-            .dimension(barDim)
-            .group(barGrp)
+            .dimension(dayDim)
+            .group(dayGrp)
             .x(d3.scale.linear().domain([0,32]))
 			.centerBar(true)
 //			.elasticX(true)
@@ -71,30 +74,31 @@ $(document).ready(function(){
 				bottom: 75,
 				left: 100
 			})
-        barChart.xAxis().tickFormat(function(d) {return d});
-        barChart.yAxis().ticks(15);
-
-        //----------------------------------- Row -------------------------------------------
+        dayChart.xAxis().tickFormat(function(d) {return d});
+        dayChart.yAxis().ticks(15);
+//----------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------ Row Demograph -----------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
 		var axisY = [];
-		var rowDim = ndx.dimension(function(d){
+		var demoDim = ndx.dimension(function(d){
 			var i = Math.floor(d.age/181);
 			axisY[i]=((181*i)+'-'+((i+1)*181));
 			return axisY[i];
 		})
-		var rowGrp = rowDim.group();
-		rowChart
+		var demoGrp = demoDim.group();
+		demographChart
 			.width(700).height(500)
 			.margins({top: 0, right: 50, bottom: 20, left: 40})
 			.elasticX(true)
-			.dimension(rowDim)
-			.group(rowGrp)
+			.dimension(demoDim)
+			.group(demoGrp)
 			.elasticX(true)
 			.ordering(function(d) {
 				return -d.key.split('-')[0];
 			})
 			.title(function(d) { return d.key+' -> '+d.value})
 
-		//-------------------------------------- Bar subchart --------------------------------
+//-------------------------------------- Bar subchart --------------------------------
 /*		var axisYear = [];
 		var subDim = ndx.dimension(function(d) {
 			var i = d.date.getFullYear()-2001;
@@ -144,8 +148,10 @@ $(document).ready(function(){
 				dc.renderAll();
 		  	});
 		});
-*/			
-		//---------------------------------------- Pie per Year -----------------------------
+*/		
+//---------------------------------------------------------------------------------------------------------------------------------	
+//-------------------------------------------------------------- Pie Year --------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
 		var yearDim = ndx.dimension(function(d) {
             return d.date.getFullYear();
         });
@@ -168,17 +174,18 @@ $(document).ready(function(){
                     ' | <a href=\'javascript:dc.filterAll(); dc.renderAll();\'\'>Reset All</a>',
                 all:'All records selected. Please click on the graph to apply filters.'
             });
-
-        //--------------------------------------- Tabla -------------------------------------------------------------
-        var dateDimension = ndx.dimension(function (d) {
-            return d.date;
+//---------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------- Tabla ------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
+        var nameDimension = ndx.dimension(function (d) {
+            return d.name;
         });
 		
         table
-            .dimension(dateDimension)
+            .dimension(nameDimension)
             .group(function (d) {
                 var format = d3.format('02d');
-                return d.date.getFullYear() + ' / ' + format((d.date.getMonth() + 1));
+                return d.date.getFullYear();
             })
             .size(20)
             .columns([
@@ -202,42 +209,92 @@ $(document).ready(function(){
 					}
 				},
 				'company',
-				'TZ'
-				
+				'TZ',
+				{
+					label: 'Select',
+					format: function (d) {
+						return '<input class="checktable" type="checkbox" id="'+d.id+'">'
+					}
+				}
             ])
             .sortBy(function (d) {
                 return d.date;
             })
             .order(d3.ascending);
-            /*.renderlet(function (table) {
-                
-            });*/
+
 		table.on('renderlet', function(table) {
 			table.selectAll('.dc-table-group').classed('info', true);
-			table.selectAll(".dc-table-row").on("click", function(d){selection(d.date, d.id, d.name, d.still, d.TZ, d.company)});
-		});
-
-// ------------------------------------------- Table Search ---------------------------------------------
-		$("#table-search").on('input',function(){
-			var nameDimension = ndx.dimension(function (d){
-				return d.name;
+			//table.selectAll(".dc-table-row").on("click", function(d){clickRow(d.date, d.id, d.name, d.still, d.TZ, d.company)});
+			table.selectAll(".dc-table-column._0").on("click", function(d){
+				var year = d.date.getFullYear();
+				var month = d.date.getMonth()+1;
+				var day = d.date.getDay();
+				$('#show-date').show();
+				$("#show-date").html('<div>Year: <span id="clickYear">'+year+'</span><br>Month: <span id="clickMonth">'+month+'</span><br>Day: <span id="clickDay">'+day+'</span><br><button onclick="closeDate()">Close</button>');
 			});
-			text_filter(nameDimension,this.value);//companyDimension is the dimension for the data table
+			table.selectAll(".dc-table-column._2").on("click", function(d){
+				clickRow(d.date, d.id, d.name, d.still, d.TZ, d.company);
+			});
+			table.selectAll(".dc-table-column._3").on("click", function(d){
+				var still = d.still;
+				var dim = ndx.dimension(function(d2) {
+					return d2.still.toString();
+				});
+				select_filter(dim, still);
+			});
+			table.selectAll(".dc-table-column._4").on("click", function(d){
+				var company = d.company;
+				var dim = ndx.dimension(function(d2) {
+					return d2.company.toString();
+				});
+				select_filter(dim, company);
+			});
+			table.selectAll(".dc-table-column._5").on("click", function(d){
+				var tz = d.TZ;
+				var dim = ndx.dimension(function(d2) {
+					return d2.TZ.toString();
+				});
+				select_filter(dim, tz);
+			});
+			$(".checktable").each(function(index, d){
+				$('#'+d.id).click(function() {
+					if ($(this).is(':checked')) {
+						return "";
+					}else{
+						return "";
+					}
+				});
+			});
+		});
+		
+		function select_filter(dim, data){
+			table.filterAll();
+			dim.filter(function(d){
+				return 0 == d.search(data);
+			});
+			dc.redrawAll();
+		}
+//---------------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------- Table Search ---------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
+		$("#table-search").on('input',function(){
+			text_filter(nameDimension, this.value);
 
 			function text_filter(dim, q){
 				table.filterAll();
 				var re = new RegExp(q,"i")
+
 				if (q != '') {
 					dim.filter(function(d) {
 						return 0 == d.search(re);
 					});
-				} else {
-					dim.filterAll();
 				}
 				dc.redrawAll();
 			}
 		});
-        //------------------------------------------------ Line ----------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------- Row Time Zone ------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
 		var tzDim = ndx.dimension(function(d) {
             return d.TZ;
         });
@@ -295,19 +352,21 @@ $(document).ready(function(){
 					.dashStyle([1,2])
             ])
 */
-        //-------------------------------------------------------- Gain and Lost ----------------------------------------------
-        var gainOrLoss = ndx.dimension(function (d) {
+//---------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------- Pie Still VS No Still -------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
+        var sNsDim = ndx.dimension(function (d) {
             return d.nostill > d.still ?  'No': 'Yes';
         });
-        var gainOrLossGroup = gainOrLoss.group();
-        gainOrLossChart
+        var sNsGrp = sNsDim.group();
+        stillNoStillChart
             .width(180) // (optional) define chart width, :default = 200
             .height(180) // (optional) define chart height, :default = 200
             .radius(80) // define pie radius
-            .dimension(gainOrLoss) // set dimension
-            .group(gainOrLossGroup)
+            .dimension(sNsDim) // set dimension
+            .group(sNsGrp)
 			.label(function (d) {
-				if (gainOrLossChart.hasFilter() && !gainOrLossChart.hasFilter(d.key)) {
+				if (stillNoStillChart.hasFilter() && !stillNoStillChart.hasFilter(d.key)) { // show %
 					return d.key + '(0%)';
 				}
 				var label = d.key;
@@ -316,20 +375,21 @@ $(document).ready(function(){
 				}
 				return label;
 			})
-		
-		//---------------------------------------------- Bar combine -------------------------------------------
-		var subDim = ndx.dimension(function(d) {
+//---------------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------- Bar Company --------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
+		var compDim = ndx.dimension(function(d) {
 			return d.company;
         }).dispose();
-		var subGrp = subDim.group().reduceSum(function(d){
+		var compGrp = compDim.group().reduceSum(function(d){
 			return d.one;
 		});
-		compChart
+		companyChart
 			.width(700)
 			.height(100)
 			.margins({top: 0, right: 50, bottom: 20, left: 40})
-			.dimension(subDim)
-			.group(subGrp)
+			.dimension(compDim)
+			.group(compGrp)
 			.centerBar(true)
 			.gap(1)
 			.x(d3.scale.linear().domain([-1, 7]))
@@ -383,7 +443,9 @@ $(document).ready(function(){
         dc.renderAll();
     });
 });
-//--------------------------------------- Valid format for dc.js ----------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------- Valid format for dc.js ---------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
 function dcFormat(d){
     var array = [];
     var keys = [];
@@ -401,7 +463,9 @@ function dcFormat(d){
     }
     return array;
 }
-//--------------------------------------------- Combine two JSON file(Birth, Aging) into one ----------------------
+//---------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------- Combine two JSON file(Birth, Aging) into one -------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
 function birAgin(d1, d2){
 	var value1 = [];
 	var value2 = [];
@@ -439,12 +503,19 @@ function birAgin(d1, d2){
 	d1['nostill'] = nosigue;
 	return d1
 }
-// ----------------------------------- close profile ---------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------- close profile or show date --------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
 function closeProfile(){
 	$('#profile').hide();
 }
-//------------------------------------------------- Selection on the table -------------------------------------
-function selection(date, id, name, still, TZ, company){
+function closeDate(){
+	$('#show-date').hide();
+}
+//---------------------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------- Onclick on the table ------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
+function clickRow(date, id, name, still, TZ, company){
 	var aux;
 	if (still == 0){
 		aux = "NO";
@@ -454,5 +525,3 @@ function selection(date, id, name, still, TZ, company){
 	$('#profile').show();
 	$("#profile").html('Name: '+name+' Id: '+id+'<br>Company: '+company+' Still: '+aux+'<br>Date: '+date.toString().split("00:00")[0]+' TZ: '+TZ+'<br><button onclick="closeProfile()">Close</button>');
 }
-// ----------------------------------- Table Search ------------------------------
-
