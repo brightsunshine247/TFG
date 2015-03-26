@@ -29,7 +29,7 @@ $(document).ready(function(){
 		// Add date for each data
 		var dateFormat = d3.time.format('%Y-%m-%dT%H:%M:%S');
 		var format = dateFormat.parse(birth['date']);
-		var initDate = ((new Date(format.getFullYear(), format.getMonth(), format.getDay())-new Date(1970, 0, 1))/(1000*60*60*24))+1;
+		var initDate = ((new Date(format.getFullYear(), format.getMonth(), format.getDay())-new Date(1970, 0, 0))/(1000*60*60*24));
         data.forEach(function (d) {
 		    d.one = 1; // value 1 for each data
 	//            d.dd = dateFormat.parse(birth['date']);
@@ -161,7 +161,68 @@ $(document).ready(function(){
             .innerRadius(30)
             .dimension(yearDim)
             .group(yearGrp);
-
+//---------------------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------- Row -> Time Zone ----------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
+		var tzDim = ndx.dimension(function(d) {
+            return d.TZ;
+        });
+        var tzGrp = tzDim.group().reduceSum(function(d) {
+            return d.one;
+        });
+        tzCharts.width(450).height(400)
+			.margins({top: 0, right: 50, bottom: 20, left: 40})
+			.elasticX(true)
+			.dimension(tzDim)
+			.group(tzGrp)
+			.elasticX(true)
+			.ordering(function(d) {
+				return d.key;
+			})
+			.title(function(d) { return d.key+' -> '+d.value})
+//---------------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------- Pie -> Still VS No Still -------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
+        var sNsDim = ndx.dimension(function (d) {
+            return d.nostill > d.still ?  'No': 'Yes';
+        });
+        var sNsGrp = sNsDim.group();
+        stillNoStillChart
+            .width(180) // (optional) define chart width, :default = 200
+            .height(180) // (optional) define chart height, :default = 200
+            .radius(80) // define pie radius
+            .dimension(sNsDim) // set dimension
+            .group(sNsGrp)
+			.label(function (d) {
+				if (stillNoStillChart.hasFilter() && !stillNoStillChart.hasFilter(d.key)) { // show %
+					return d.key + '(0%)';
+				}
+				var label = d.key;
+				if (all.value()) {
+					label += '(' + Math.floor(d.value / all.value() * 100) + '%)';
+				}
+				return label;
+			})
+//---------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------- Bar -> Company --------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------
+		var compDim = ndx.dimension(function(d) {
+			return d.company;
+        }).dispose();
+		var compGrp = compDim.group().reduceSum(function(d){
+			return d.one;
+		});
+		companyChart
+			.width(450)
+			.height(300)
+			.margins({top: 0, right: 50, bottom: 20, left: 40})
+			.dimension(compDim)
+			.group(compGrp)
+			.centerBar(true)
+			.gap(1)
+			.x(d3.scale.linear().domain([-1, 7]))
+			.elasticY(true)
+			.alwaysUseRounding(true);
 		// ---------------------------- Reset All charts and dataTable -------------------------------------
         dc.dataCount('.dc-data-count')
             .dimension(ndx)
@@ -180,16 +241,13 @@ $(document).ready(function(){
 		
         table
             .dimension(nameDimension)
-            .group(function (d) {
-                var format = d3.format('02d');
-                return d.date.getFullYear();
-            })
+            .group(function (d) {return "";})
             .size(20)
             .columns([
                 {
                     label: 'Date', // desired format of column name 'Change' when used as a label with a function.
                     format: function (d) {
-                        var formato = d3.format('02d');
+            			var formato = d3.format('02d');
 						return d.date.getFullYear() + ' / ' + formato((d.date.getMonth() + 1)) + ' / ' + formato(d.date.getDay()+1);
                     }
                 },
@@ -222,6 +280,36 @@ $(document).ready(function(){
 		table.on('renderlet', function(table) {
 			table.selectAll('.dc-table-group').classed('info', true);
 			//table.selectAll(".dc-table-row").on("click", function(d){clickRow(d.date, d.id, d.name, d.still, d.TZ, d.company)});
+			// ---------------------------- Sort ---------------------------------------------------
+			table.selectAll('.dc-table-head').on("click", function(d){
+				table.filterAll();
+				if (d.label == "Date"){
+					table.sortBy(function (d2){
+						return d2.date;
+					});
+				}else if (d == "id"){
+					table.sortBy(function (d2){
+						return d2.id;
+					});
+				}else if (d == "name"){
+					table.sortBy(function (d2){
+						return d2.name;
+					});
+				}else if (d == "company"){
+					table.sortBy(function (d2){
+						return d2.company;
+					});
+				}else if (d == "TZ"){
+					table.sortBy(function (d2){
+						return d2.TZ;
+					});
+				}else if (d.label == "Still"){
+					table.sortBy(function(d2){
+						return d2.still;
+					});
+				}
+				dc.redrawAll();
+			}); 
 			// ---------------------------- First column, Date -------------------------------------
 			table.selectAll(".dc-table-column._0").on("click", function(d){
 				var year = d.date.getFullYear();
@@ -282,14 +370,12 @@ $(document).ready(function(){
 //---------------------------------------------------------------------------------------------------------------------------------
 		$("#table-search").on('input',function(){
 			text_filter(nameDimension, this.value);
-
 			function text_filter(dim, q){
 				table.filterAll();
 				var re = new RegExp(q,"i")
-
 				if (q != '') {
 					dim.filter(function(d) {
-						return 0 == d.search(re);
+						return 0 == d.search(q);
 					});
 				}else{
 					dim.filterAll();
@@ -297,154 +383,7 @@ $(document).ready(function(){
 				dc.redrawAll();
 			}
 		});
-//---------------------------------------------------------------------------------------------------------------------------------
-//---------------------------------------------------- Row -> Time Zone ----------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------------
-		var tzDim = ndx.dimension(function(d) {
-            return d.TZ;
-        });
-        var tzGrp = tzDim.group().reduceSum(function(d) {
-            return d.one;
-        });
-        tzCharts.width(450).height(400)
-			.margins({top: 0, right: 50, bottom: 20, left: 40})
-			.elasticX(true)
-			.dimension(tzDim)
-			.group(tzGrp)
-			.elasticX(true)
-			.ordering(function(d) {
-				return d.key;
-			})
-			.title(function(d) { return d.key+' -> '+d.value})
-/*		
-        var lineDim = ndx.dimension(function (d) {
-            return d.age;
-        });
-		var lineDim2 = ndx.dimension(function (d) {
-            return d.age/31;
-        });
-        var lineGrp = lineDim.group().reduceSum(function (d) {
-            return d.sigue;
-        });
-		var lineGrp2 = lineDim.group().reduceSum(function (d){
-			return d.nosigue;
-		})
-        lineCharts
-            .width(1000)
-            .height(350)
-            .transitionDuration(1000)
-            .margins({top: 30, right: 50, bottom: 25, left: 40})
-            .mouseZoomable(true)
-       	//	.x(d3.time.scale().domain([new Date(2015, 0, 1), new Date(2015, 11, 31)]))
-			.x(d3.scale.linear().domain([0,50]))
-//            .round(d3.time.month.round)
-//       		.xUnits(d3.time.months)
-			.elasticX(true)
-            .elasticY(true)
-            .renderHorizontalGridLines(true)
-            .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
-            .brushOn(true)
-			.compose([
-				dc.lineChart(lineCharts)
-					.dimension(lineDim)
-					.colors('red')
-					.group(lineGrp, "Birth")
-					.dashStyle([0,0]),
-				dc.lineChart(lineCharts)
-					.dimension(lineDim2)
-					.colors('blue')
-					.group(lineGrp2, "Aging")
-					.dashStyle([1,2])
-            ])
-*/
-//---------------------------------------------------------------------------------------------------------------------------------
-//----------------------------------------------------- Pie -> Still VS No Still -------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------------
-        var sNsDim = ndx.dimension(function (d) {
-            return d.nostill > d.still ?  'No': 'Yes';
-        });
-        var sNsGrp = sNsDim.group();
-        stillNoStillChart
-            .width(180) // (optional) define chart width, :default = 200
-            .height(180) // (optional) define chart height, :default = 200
-            .radius(80) // define pie radius
-            .dimension(sNsDim) // set dimension
-            .group(sNsGrp)
-			.label(function (d) {
-				if (stillNoStillChart.hasFilter() && !stillNoStillChart.hasFilter(d.key)) { // show %
-					return d.key + '(0%)';
-				}
-				var label = d.key;
-				if (all.value()) {
-					label += '(' + Math.floor(d.value / all.value() * 100) + '%)';
-				}
-				return label;
-			})
-//---------------------------------------------------------------------------------------------------------------------------------
-//-------------------------------------------------------- Bar -> Company --------------------------------------------------------
-//---------------------------------------------------------------------------------------------------------------------------------
-		var compDim = ndx.dimension(function(d) {
-			return d.company;
-        }).dispose();
-		var compGrp = compDim.group().reduceSum(function(d){
-			return d.one;
-		});
-		companyChart
-			.width(450)
-			.height(300)
-			.margins({top: 0, right: 50, bottom: 20, left: 40})
-			.dimension(compDim)
-			.group(compGrp)
-			.centerBar(true)
-			.gap(1)
-			.x(d3.scale.linear().domain([-1, 7]))
-			.elasticY(true)
-			.alwaysUseRounding(true);
-/*		var combDim = ndx.dimension(function (d) {
-			var i = Math.floor(d.age/181);
-			return axisY[i];
-		});
-		var combGrp = combDim.group().reduceSum(function (d){
-			return d.one;
-		});
-		var combGrp2 = combDim.group().reduceSum(function (d){
-			return d.sigue;
-		});
-		combined
-			.width(1100)
-			.height(450)
-			//  .colors( d3.scale.category10() )
-			//  .shareColors(true)
-			.brushOn(true)
-			.elasticY(true)
-			.x(d3.scale.ordinal().domain(axisY))
-			.xUnits(dc.units.ordinal)
-//			.xUnits( function() { return 20; } )
-//			.margins({top: 15, right: 10, bottom: 20, left: 40});
-			.renderHorizontalGridLines(true)
-			.margins({
-				top: 10,
-				right: 10,
-				bottom: 75,
-				left: 100
-			})
-			.legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
-			.compose([
-				dc.barChart(combined)
-					.dimension(combDim)
-					.colors('red')
-					.group(combGrp, 'Birth')
-					.centerBar(true)
-					.barPadding(0.2),
 
-				dc.barChart(combined)
-					.dimension(combDim)
-					.colors('blue')
-					.group(combGrp2, 'Aging')
-					.centerBar(true)
-					.barPadding(0.3)
-			])
-*/
         dc.renderAll();
     });
 });
