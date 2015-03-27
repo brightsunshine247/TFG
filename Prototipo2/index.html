@@ -25,22 +25,16 @@
             <div class="row">
                 <div id="still-nostill-chart">
                     <strong>Still VS No Still</strong>
-<!--                    <a class="reset" href="javascript:stillNoStillChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
--->
                     <div class="clearfix"></div>
                 </div>
 
 				<div id="year-chart">
                     <strong>Year</strong>
-<!--                    <a class="reset" href="javascript:yearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
--->
                     <div class="clearfix"></div>
                 </div>
 				
                 <div id="month-chart">
                     <strong>Month</strong>
-<!--                    <a class="reset" href="javascript:monthChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
--->
                     <div class="clearfix"></div>
                 </div>
 			</div>
@@ -48,23 +42,11 @@
 			<div class="row">
                 <div id="demograph-chart">
                     <strong>Demograph</strong>
-<!--                    <a class="reset" href="javascript:demographChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
--->
                     <div class="clearfix"></div>
                 </div>
-<!--				
-				<div id="initDate">
-					<strong>Select init date</strong>
-				</div>
-				<div id="finalDate">
-					<strong>Select final date</strong>
-				</div>-->
 				<div id="time-zone-chart">
                     <strong>Time Zone</strong>
                     <span class="reset" style="display: none;">range: <span class="filter"></span></span>
-<!--                    <a class="reset" href="javascript:moveChart.filterAll();tzChart.filterAll();dc.redrawAll();"
-                       style="display: none;">reset</a>
--->
                     <div class="clearfix"></div>
                 </div>
                 
@@ -74,33 +56,25 @@
                 <div id="day-chart">
                     <strong>Days</strong>
                     <span class="reset" style="display: none;">range: <span class="filter"></span></span>
-<!--                    <a class="reset" href="javascript:dayChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
--->
                     <div class="clearfix"></div>
                 </div>
 
 				<div id="company-chart">
 					<strong>Companys</strong>
 					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
-<!--                    <a class="reset" href="javascript:companyChart.filterAll();dc.redrawAll();"
-                       style="display: none;">reset</a>
--->
                     <div class="clearfix"></div>
 				</div>
 			</div>
-            <div class="row">
 
-                <div>
-                    <div class="dc-data-count">
-                        <span class="filter-count"></span> selected out of <span class="total-count"></span> records | <a 
-                            href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
-                    </div>
-					<button class="btn btn-danger" id="clickReset">Reset All</button>
+            <div class="row">
+                <div class="dc-data-count">
+                    <span class="filter-count"></span> selected out of <span class="total-count"></span> records | <a 
+                        href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
                 </div>
+				<span>Select the records you want to filt <button onclick="filt()">Filt</button></span>
 				<div align="right">Search by Name: <input type="text" id="table-search" value=""></input></div>
 				The table shows only first 20 records if you not select any filt
-	            <table class="table table-hover dc-data-table">
-	            </table>
+	            <table class="table table-hover dc-data-table"></table>
             </div>
         </div>
     </body>
