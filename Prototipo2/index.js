@@ -1,6 +1,8 @@
 var aging = {};
 var birth = {};
 var check = [];
+var table;
+var idDim;
 $(document).ready(function(){
     var stillNoStillChart = dc.pieChart('#still-nostill-chart');
     var monthChart = dc.pieChart('#month-chart');
@@ -9,7 +11,7 @@ $(document).ready(function(){
 	var yearChart = dc.pieChart('#year-chart');
     var tzCharts = dc.rowChart('#time-zone-chart');
 	var companyChart = dc.barChart('#company-chart');
-	var table = dc.dataTable('.dc-data-table');
+	table = dc.dataTable('.dc-data-table');
     $.when(
 		// Load agin json file
         $.getJSON('its-demographics-aging.json', function (data) {
@@ -184,33 +186,53 @@ $(document).ready(function(){
         var nameDimension = ndx.dimension(function (d) {
             return d.name;
         });
-		
+		idDim = ndx.dimension(function (d) {return d.id});
         table
             .dimension(nameDimension)
             .group(function (d) {return "";})
             .size(20)
             .columns([
                 {
-                    label: 'Date', // desired format of column name 'Change' when used as a label with a function.
+                    label: 'Date  <img src="arrow.png" height="10" width="10" onclick="sortB('+"'date'"+')">',
                     format: function (d) {
             			var formato = d3.format('02d');
 						return d.date.getFullYear() + ' / ' + formato((d.date.getMonth() + 1)) + ' / ' + formato(d.date.getDay()+1);
                     }
                 },
-                'id',
-                'name',
+                {
+					label: 'Id <img src="arrow.png" height="10" width="10" onclick="sortB('+"'id'"+')">',
+					format: function (d) {
+						return d.id;
+					}
+				},
+                {
+					label: 'Name <img src="arrow.png" height="10" width="10" onclick="sortB('+"'name'"+')">',
+					format: function (d) {
+						return d.name;
+					}
+				},
 				{
-					label: 'Still',
+					label: 'Still <img src="arrow.png" height="10" width="10" onclick="sortB('+"'still'"+')">',
 					format: function (d) {
 						if (d.still == 1){
 							return 'YES';
 						}else{
 							return 'NO';
-						};
+						}
 					}
 				},
-				'company',
-				'TZ',
+				{
+					label: 'Company <img src="arrow.png" height="10" width="10" onclick="sortB('+"'company'"+')">',
+					format: function (d) {
+						return d.company;
+					}
+				},
+				{
+					label: 'TZ <img src="arrow.png" height="10" width="10" onclick="sortB('+"'tz'"+')">',
+					format: function (d) {
+						return d.TZ;
+					}
+				},
 				{
 					label: 'Select',
 					format: function (d) {
@@ -225,36 +247,6 @@ $(document).ready(function(){
 
 		table.on('renderlet', function(table) {
 			table.selectAll('.dc-table-group').classed('info', true);
-			// ---------------------------- Sort ---------------------------------------------------
-			table.selectAll('.dc-table-head').on("click", function(d){
-				table.filterAll();
-				if (d.label == "Date"){
-					table.sortBy(function (d2){
-						return d2.date;
-					});
-				}else if (d == "id"){
-					table.sortBy(function (d2){
-						return d2.id;
-					});
-				}else if (d == "name"){
-					table.sortBy(function (d2){
-						return d2.name;
-					});
-				}else if (d == "company"){
-					table.sortBy(function (d2){
-						return d2.company;
-					});
-				}else if (d == "TZ"){
-					table.sortBy(function (d2){
-						return d2.TZ;
-					});
-				}else if (d.label == "Still"){
-					table.sortBy(function(d2){
-						return d2.still;
-					});
-				}
-				dc.redrawAll();
-			}); 
 			// ---------------------------- First column, Date -------------------------------------
 			table.selectAll(".dc-table-column._0").on("click", function(d){
 				var year = d.date.getFullYear();
@@ -314,9 +306,7 @@ $(document).ready(function(){
 			});
 			dc.redrawAll();
 		}
-		$("#filt").on("click", function(){
-			
-		});
+		
 /*********************************************************************************************************************************
 ********************************************************** Table Search **********************************************************
 *********************************************************************************************************************************/
@@ -423,4 +413,43 @@ function clickRow(date, id, name, still, TZ, company){
 	}
 	$('#profile').show();
 	$("#profile").html('Name: '+name+' Id: '+id+'<br>Company: '+company+' Still: '+aux+'<br>Date: '+date.toString().split("00:00")[0]+' TZ: '+TZ+'<br><button onclick="closeProfile()">Close</button>');
+}
+/*********************************************************************************************************************************
+********************************************************** SortBy Click **********************************************************
+*********************************************************************************************************************************/
+function sortB(d) {
+	table.filterAll();
+	if (d == 'date'){
+		table.sortBy(function (d2){
+			return d2.date;
+		});
+	}else if (d == "id"){
+		table.sortBy(function (d2){
+			return d2.id;
+		});
+	}else if (d == "name"){
+		table.sortBy(function (d2){
+			return d2.name;
+		});
+	}else if (d == "company"){
+		table.sortBy(function (d2){
+			return d2.company;
+		});
+	}else if (d == "tz"){
+		table.sortBy(function (d2){
+			return d2.TZ;
+		});
+	}else if (d == "still"){
+		table.sortBy(function(d2){
+			return d2.still;
+		});
+	}
+	dc.redrawAll();
+}
+
+function filt(){
+	table.filterAll();
+	idDim.filter(check);
+	dc.redrawAll();
+	check = [];
 }
