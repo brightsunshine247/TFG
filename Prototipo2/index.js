@@ -10,7 +10,7 @@ $(document).ready(function(){
     var demographChart = dc.rowChart('#demograph-chart');
 	var yearChart = dc.pieChart('#year-chart');
     var tzCharts = dc.rowChart('#time-zone-chart');
-	var companyChart = dc.barChart('#company-chart');
+	var companyChart = dc.rowChart('#company-chart');
 	table = dc.dataTable('.dc-data-table');
     $.when(
 		// Load agin json file
@@ -37,6 +37,44 @@ $(document).ready(function(){
 		    d.date = dateFormat.parse(dateFormat(new Date(1970, 0, d.day)));
 		});
 /*********************************************************************************************************************************
+**************************************************** Pie -> Still VS No Still ****************************************************
+*********************************************************************************************************************************/
+        var sNsDim = ndx.dimension(function (d) {
+            return d.nostill > d.still ?  'No': 'Yes';
+        });
+        var sNsGrp = sNsDim.group();
+        stillNoStillChart
+            .width(180) // (optional) define chart width, :default = 200
+            .height(180) // (optional) define chart height, :default = 200
+            .radius(80) // define pie radius
+            .dimension(sNsDim) // set dimension
+            .group(sNsGrp)
+			.label(function (d) {
+				if (stillNoStillChart.hasFilter() && !stillNoStillChart.hasFilter(d.key)) { // show %
+					return d.key + '(0%)';
+				}
+				var label = d.key;
+				if (all.value()) {
+					label += '(' + Math.floor(d.value / all.value() * 100) + '%)';
+				}
+				return label;
+			})
+/*********************************************************************************************************************************
+*********************************************************** Pie -> Year **********************************************************
+*********************************************************************************************************************************/
+		var yearDim = ndx.dimension(function(d) {
+            return d.date.getFullYear();
+        });
+        var yearGrp = yearDim.group().reduceSum(function(d) {
+            return d.one;
+        });
+        yearChart.width(180)
+            .height(180)
+            .radius(80)
+            .innerRadius(30)
+            .dimension(yearDim)
+            .group(yearGrp);
+/*********************************************************************************************************************************
 ****************************************************** Pie (Donuts) -> Month *****************************************************
 *********************************************************************************************************************************/
         var monthDim = ndx.dimension(function(d) {
@@ -52,7 +90,7 @@ $(document).ready(function(){
             .dimension(monthDim)
             .group(monthGrp);
 /*********************************************************************************************************************************
-***************************************************** Pie (Donuts) -> Month ******************************************************
+*********************************************************** Bar -> Day ***********************************************************
 *********************************************************************************************************************************/
         var dayDim = ndx.dimension(function(d) {
             return (d.date.getDay()+1);
@@ -94,21 +132,7 @@ $(document).ready(function(){
 				return -d.key.split('-')[0];
 			})
 			.title(function(d) { return d.key+' -> '+d.value})
-/*********************************************************************************************************************************
-*********************************************************** Pie -> Year **********************************************************
-*********************************************************************************************************************************/
-		var yearDim = ndx.dimension(function(d) {
-            return d.date.getFullYear();
-        });
-        var yearGrp = yearDim.group().reduceSum(function(d) {
-            return d.one;
-        });
-        yearChart.width(180)
-            .height(180)
-            .radius(80)
-            .innerRadius(30)
-            .dimension(yearDim)
-            .group(yearGrp);
+
 /*********************************************************************************************************************************
 ******************************************************** Row -> Time Zone ********************************************************
 *********************************************************************************************************************************/
@@ -128,50 +152,28 @@ $(document).ready(function(){
 				return d.key;
 			})
 			.title(function(d) { return d.key+' -> '+d.value})
+
 /*********************************************************************************************************************************
-**************************************************** Pie -> Still VS No Still ****************************************************
-*********************************************************************************************************************************/
-        var sNsDim = ndx.dimension(function (d) {
-            return d.nostill > d.still ?  'No': 'Yes';
-        });
-        var sNsGrp = sNsDim.group();
-        stillNoStillChart
-            .width(180) // (optional) define chart width, :default = 200
-            .height(180) // (optional) define chart height, :default = 200
-            .radius(80) // define pie radius
-            .dimension(sNsDim) // set dimension
-            .group(sNsGrp)
-			.label(function (d) {
-				if (stillNoStillChart.hasFilter() && !stillNoStillChart.hasFilter(d.key)) { // show %
-					return d.key + '(0%)';
-				}
-				var label = d.key;
-				if (all.value()) {
-					label += '(' + Math.floor(d.value / all.value() * 100) + '%)';
-				}
-				return label;
-			})
-/*********************************************************************************************************************************
-********************************************************* Bar -> Company *********************************************************
+********************************************************* Row -> Company *********************************************************
 *********************************************************************************************************************************/
 		var compDim = ndx.dimension(function(d) {
 			return d.company;
-        }).dispose();
+        });
 		var compGrp = compDim.group().reduceSum(function(d){
 			return d.one;
 		});
 		companyChart
-			.width(450)
-			.height(300)
+			.width(450).height(300)
 			.margins({top: 0, right: 50, bottom: 20, left: 40})
+			.elasticX(true)
 			.dimension(compDim)
 			.group(compGrp)
-			.centerBar(true)
-			.gap(1)
-			.x(d3.scale.linear().domain([-1, 7]))
-			.elasticY(true)
-			.alwaysUseRounding(true);
-		// ---------------------------- Reset All charts and dataTable -------------------------------------
+			.elasticX(true)
+			.ordering(function(d) {
+				return d.key;
+			})
+			.title(function(d) { return d.key+' -> '+d.value})
+// ---------------------------- Reset All charts and dataTable -------------------------------------
         dc.dataCount('.dc-data-count')
             .dimension(ndx)
             .group(all)
@@ -253,7 +255,9 @@ $(document).ready(function(){
 				var month = d.date.getMonth()+1;
 				var day = d.date.getDay()+1;
 				$('#show-date').show();
-				$("#show-date").html('<div>Year: <span id="clickYear">'+year+'</span><br>Month: <span id="clickMonth">'+month+'</span><br>Day: <span id="clickDay">'+day+'</span><br><button onclick="closeDate()">Close</button>');
+				$('#clickYear').html(year);
+				$('#clickMonth').html(month);
+				$('#clickDay').html(day);
 			});
 			// ---------------------------- Third column, Name ---------------------------------------
 			table.selectAll(".dc-table-column._2").on("click", function(d){
@@ -288,17 +292,56 @@ $(document).ready(function(){
 				$('#'+d.id).click(function() {
 					if ($(this).is(':checked')) {
 						check.push(d.id);
-//						return "";
 					}else{
 						var i = check.indexOf(d.id);
 						check.splice(i, 1)
-//						return "";
 					}
 					console.log(check);
 				});
 			});
 		});
-		// ---------------------------- Column select filter function for dataTable -------------------------------------
+/*********************************************************************************************************************************
+*********************************************************** Click Year ***********************************************************
+*********************************************************************************************************************************/
+		$('#clickYear').on('click', function(){
+			var year = document.getElementById('clickYear').innerHTML;
+			table.filterAll();
+			var dim = ndx.dimension(function(d){
+				return d.date.getFullYear();
+			});
+			dim.filter(year);
+			closeDate();
+			dc.redrawAll();
+		});
+/*********************************************************************************************************************************
+********************************************************** Click Month ***********************************************************
+*********************************************************************************************************************************/
+		$('#clickMonth').on('click', function(){
+			var month = document.getElementById('clickMonth').innerHTML;
+			table.filterAll();
+			var dim = ndx.dimension(function(d){
+				return d.date.getMonth()+1;
+			});
+			dim.filter(month);
+			closeDate();
+			dc.redrawAll();
+		});
+/*********************************************************************************************************************************
+*********************************************************** Click Day ************************************************************
+*********************************************************************************************************************************/
+		$('#clickDay').on('click', function(){
+			var day = document.getElementById('clickDay').innerHTML;
+			table.filterAll();
+			var dim = ndx.dimension(function(d){
+				return d.date.getDay()+1;
+			});
+			dim.filter(day);
+			closeDate();
+			dc.redrawAll();
+		});
+/*********************************************************************************************************************************
+******************************************* Column select filter function for dataTable ******************************************
+*********************************************************************************************************************************/
 		function select_filter(dim, data){
 			table.filterAll();
 			dim.filter(function(d){
@@ -411,7 +454,7 @@ function clickRow(date, id, name, still, TZ, company){
 		aux = "YES";
 	}
 	$('#profile').show();
-	$("#profile").html('Name: '+name+' Id: '+id+'<br>Company: '+company+' Still: '+aux+'<br>Date: '+date.toString().split("00:00")[0]+' TZ: '+TZ+'<br><button onclick="closeProfile()">Close</button>');
+	$("#profile").html('Name: '+name+' Id: '+id+'<br>Company: '+company+' Still: '+aux+'<br>Date: '+date.toString().split("00:00")[0]+' Time Zone: '+TZ+'<br><button onclick="closeProfile()">Close</button>');
 }
 /*********************************************************************************************************************************
 ********************************************************** SortBy Click **********************************************************
@@ -449,6 +492,7 @@ function sortB(d) {
 ********************************************************** Filter Click **********************************************************
 *********************************************************************************************************************************/
 function filt(){
+	dc.filterAll();
 	table.filterAll();
 	if (check.length > 0){
 		idDim.filter(function (d){

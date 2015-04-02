@@ -19,7 +19,12 @@
 </head>
     <body>
 		<div id="profile" style="display: none"></div>
-		<div id="show-date" style="display: none"></div>
+		<div id="show-date" style="display: none">
+			Year: <span id="clickYear"></span><br>
+			Month: <span id="clickMonth"></span><br>
+			Day: <span id="clickDay"></span><br>
+			<button onclick="closeDate()">Close</button>
+		</div>
         <div class="container">
 
             <div class="row">
@@ -72,8 +77,8 @@
                         href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
                 </div>
 				<div align="right">Search by Name: <input type="text" id="table-search" value=""></input></div>
-				The table shows only first 20 records if you not select any filt<br>
-				<span>Select the records you want to filt <button onclick="filt()">Filt</button></span>
+				The table shows only first 20 records if you not select any filt
+				<div align="right" style="float: right">Select the records you want to filter <button onclick="filt()">Filter</button></div>
 	            <table class="table table-hover dc-data-table"></table>
             </div>
         </div>
