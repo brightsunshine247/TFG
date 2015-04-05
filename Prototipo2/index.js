@@ -34,10 +34,12 @@ $(document).ready(function(){
 		var dateFormat = d3.time.format('%Y-%m-%dT%H:%M:%S');
 		var format = dateFormat.parse(birth['date']);
 		var initDate = ((new Date(format.getFullYear(), format.getMonth(), format.getDay())-new Date(1970, 0, 0))/(1000*60*60*24));
+		var sliderDate = [];
         data.forEach(function (d) {
 		    d.one = 1; // value 1 for each data
 			d.day = initDate-d.age;
 		    d.date = dateFormat.parse(dateFormat(new Date(1970, 0, d.day)));
+			sliderDate.push(d.date.getFullYear());
 		});
 /*********************************************************************************************************************************
 **************************************************** Pie -> Still VS No Still ****************************************************
@@ -180,6 +182,43 @@ $(document).ready(function(){
 				return d.key;
 			})
 			.title(function(d) { return d.key+' -> '+d.value})
+/*********************************************************************************************************************************
+************************************************************** Slider ************************************************************
+**********************************************************************************************************************************/
+		sliderDate.sort(function(a, b){return a-b});
+		var dateFirst = sliderDate[0];
+		var dateLast = sliderDate[sliderDate.length-1]; 
+/*
+		d3.select("#slider-range")
+            .call(d3.slider()
+				.axis(true)
+				.min(sliderDate[0])
+				.max(sliderDate[sliderDate.length-1])
+				.value(sliderDate)
+		        .on("slide",function(evt,value){
+		            console.log(value)
+		            d3.select("#slidertextmin").text(Math.floor(value));
+		            d3.select("#slidertextmax").text(Math.floor(value[1]));
+				})
+			)
+*/
+		
+		$( "#slider-range" ).slider({
+			range: true,
+			min: dateFirst,
+			max: dateLast,
+			values: [ dateFirst, dateLast ],
+			slide: function( event, ui ) {
+				yearDim.filter(function (d){
+					if ((d > ui.values[0]-1) && (d < ui.values[1]+1)){
+						return d;
+					}
+				});
+				dc.redrawAll();
+				$( "#amount" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+			}
+		});
+		$( "#amount" ).val($( "#slider-range" ).slider( "values", 0 ) + " - " + $( "#slider-range" ).slider( "values", 1 ) );
 // ---------------------------- Reset All charts and dataTable -------------------------------------
         dc.dataCount('.dc-data-count')
             .dimension(ndx)
@@ -260,7 +299,7 @@ $(document).ready(function(){
 			table.selectAll('.dc-table-head .still').on('click', function(d){
 				var html = '';
 				$('#pop').show();
-				html = 'Still VS No Still<hr>'
+				html = '<strong>Still VS No Still</strong><br>'
 				var still = sNsGrp.top(Infinity);
 				$.each(still, function(i, d){
 					html += '<a onclick="tableFilter('+"'still', "+"'"+d.key.toString()+"'"+')">' + d.key + ': ' + d.value + '</a><br>';
@@ -271,7 +310,7 @@ $(document).ready(function(){
 			table.selectAll('.dc-table-head .company').on('click', function(d){
 				var html = '';
 				$('#pop').show();
-				html = 'Company<hr>'
+				html = '<strong>Company</strong><br>'
 				var still = compGrp.top(Infinity);
 				$.each(still, function(i, d){
 					html += '<a onclick="tableFilter('+"'company', "+"'"+d.key.toString()+"'"+')">' + d.key + ': ' + d.value + '</a><br>';
@@ -282,7 +321,7 @@ $(document).ready(function(){
 			table.selectAll('.dc-table-head .tz').on('click', function(d){
 				var html = '';
 				$('#pop').show();
-				html = 'Time Zone<hr>'
+				html = '<strong>Time Zone</strong><br>'
 				var still = tzGrp.top(Infinity);
 				$.each(still, function(i, d){
 					html += '<a onclick="tableFilter('+"'tz', "+"'"+d.key.toString()+"'"+')">' + d.key + ': ' + d.value + '</a><br>';
@@ -441,8 +480,6 @@ function birAgin(d1, d2){
 ************************************************ close profile, "show date" or pop ***********************************************
 *********************************************************************************************************************************/
 function closeProfile(){
-	dc.filterAll();
-	dc.redrawAll();
 	$('#profile').hide();
 }
 function closeDate(){
@@ -462,7 +499,7 @@ function clickRow(date, id, name, still, TZ, company){
 		aux = "YES";
 	}
 	$('#profile').show();
-	$("#profile").html('Name: '+name+' Id: '+id+'<br>Company: '+company+' Still: '+aux+'<br>Date: '+date.toString().split("00:00")[0]+' Time Zone: '+TZ+'<br><button onclick="closeProfile()">Close</button>');
+	$("#profile").html('<strong>Profile</strong><br>Name: '+name+' Id: '+id+'<br>Company: '+company+' Still: '+aux+'<br>Date: '+date.toString().split("00:00")[0]+' Time Zone: '+TZ+'<br><button onclick="closeProfile()">Close</button>');
 }
 /*********************************************************************************************************************************
 ********************************************************** SortBy Click **********************************************************
@@ -517,7 +554,6 @@ function filt(){
 *********************************************************************************************************************************/
 function tableFilter(type, data){
 	closePop();
-//	dc.filterAll();
 	table.filterAll();
 	if (type == 'still'){
 		if (data == 'Yes'){
@@ -527,7 +563,6 @@ function tableFilter(type, data){
 		} else {
 			stillDim.filter(data);
 		}
-		
 	}else if (type == 'company'){
 		compDim.filter(data);
 	}else if (type == 'tz'){

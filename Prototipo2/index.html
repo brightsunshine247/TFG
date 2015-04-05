@@ -4,13 +4,17 @@
     <title>QZ DashBoard DC</title>
 
     <meta charset="UTF-8">
-
+	<!-- CSS -->
     <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/jquery-ui.custom.min.css">
     <link rel="stylesheet" type="text/css" href="../css/dc.css"/>
+	<link rel="stylesheet" type="text/css" href="d3.slider.css">
 	<link rel="stylesheet" type="text/css" href="index.css"/>
-
+	<!-- JavaScrip -->
     <script type="text/javascript" src="../js/jquery.min.js"></script>
+	<script type="text/javascript" src="../js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="../js/d3.js"></script>
+    <script type="text/javascript" src="d3.slider.js"></script>
     <script type="text/javascript" src="../js/crossfilter.js"></script>
     <script type="text/javascript" src="../js/dc.js"></script>
     <script type="text/javascript" src="../js/colorbrewer.js"></script>
@@ -20,6 +24,7 @@
     <body>
 		<div id="profile" style="display: none"></div>
 		<div id="show-date" style="display: none">
+			<strong>Date</strong><br>
 			Year: <a id="clickYear"></a><br>
 			Month: <a id="clickMonth"></a><br>
 			Day: <a id="clickDay"></a><br>
@@ -73,6 +78,13 @@
 			</div>
 
             <div class="row">
+				<hr>
+				<label for="amount" style="float:left">Date range:</label>
+				<input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold; width:75px; height:15px;">
+<!--				<div>
+					Year: <span id="slidertextmin"></span> - <span id="slidertextmax"></span>
+				</div>-->
+				<div id="slider-range"></div><br>
                 <div class="dc-data-count">
                     <span class="filter-count"></span> selected out of <span class="total-count"></span> records | <a 
                         href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
