@@ -51,7 +51,7 @@ Para poder hacer click en dataTable o barChart tenemos que usar las siguientes f
 		_chart.selectAll(".dc-table-row").on("click", function(d){...});
 	});
 En este aspecto es más complicado si lo comparamos con las bibliotecas de NVd3 o C3 que tienen el evento onclick.
-Y sólo se puede hacer el evento onclick en dataTable o barChart(.brushOn(false)) porque en el chart que se pinta tienen una clase que se llama "dc-table-row" depende de como le hayas llamado a la clase del div para dateTable y "rect" para barChart que esta predefinido para cada elemento del chart en esas clases y se puedehacer dicho evento. 
+Y sólo se puede hacer el evento onclick en dataTable o barChart(.brushOn(false)) porque en el chart que se pinta tienen una clase que se llama "dc-table-row" depende de como le hayas llamado a la clase del div para dateTable y "rect" para barChart que esta predefinido para cada elemento del chart en esas clases y se puede hacer dicho evento. 
 
 Prototipo3:
 Uso de las bibliotecas NVD3, d3, crossfilter con los archivos json: its_demographic_aging.json y its_demographic_birth.json.

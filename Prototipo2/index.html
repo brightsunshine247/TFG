@@ -8,13 +8,11 @@
     <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="../css/jquery-ui.custom.min.css">
     <link rel="stylesheet" type="text/css" href="../css/dc.css"/>
-	<link rel="stylesheet" type="text/css" href="d3.slider.css">
 	<link rel="stylesheet" type="text/css" href="index.css"/>
 	<!-- JavaScrip -->
     <script type="text/javascript" src="../js/jquery.min.js"></script>
 	<script type="text/javascript" src="../js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="../js/d3.js"></script>
-    <script type="text/javascript" src="d3.slider.js"></script>
     <script type="text/javascript" src="../js/crossfilter.js"></script>
     <script type="text/javascript" src="../js/dc.js"></script>
     <script type="text/javascript" src="../js/colorbrewer.js"></script>
@@ -22,15 +20,7 @@
     <script type="text/javascript" src="index.js"></script>
 </head>
     <body>
-		<div id="profile" style="display: none"></div>
-		<div id="show-date" style="display: none">
-			<strong>Date</strong><br>
-			Year: <a id="clickYear"></a><br>
-			Month: <a id="clickMonth"></a><br>
-			Day: <a id="clickDay"></a><br>
-			<button onclick="closeDate()">Close</button>
-		</div>
-		<div id="pop" style="display: none"></div>
+		
         <div class="container">
 
             <div class="row">
@@ -81,10 +71,7 @@
 				<hr>
 				<label for="amount" style="float:left">Date range:</label>
 				<input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold; width:75px; height:15px;">
-<!--				<div>
-					Year: <span id="slidertextmin"></span> - <span id="slidertextmax"></span>
-				</div>-->
-				<div id="slider-range"></div><br>
+				<div id="slider-range" style="z-index:1;"></div><br>
                 <div class="dc-data-count">
                     <span class="filter-count"></span> selected out of <span class="total-count"></span> records | <a 
                         href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
@@ -95,5 +82,14 @@
 	            <table class="table table-hover dc-data-table"></table>
             </div>
         </div>
+		<div id="profile" style="display: none; z-index:2;"></div>
+		<div id="show-date" style="display: none; z-index:2;">
+			<strong>Date</strong><br>
+			Year: <a id="clickYear"></a><br>
+			Month: <a id="clickMonth"></a><br>
+			Day: <a id="clickDay"></a><br>
+			<button onclick="closeDate()">Close</button>
+		</div>
+		<div id="pop" style="display: none; z-index: 2;"></div>
     </body>
 </html>

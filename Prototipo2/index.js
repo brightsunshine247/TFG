@@ -102,7 +102,7 @@ $(document).ready(function(){
 *********************************************************** Bar -> Day ***********************************************************
 *********************************************************************************************************************************/
         var dayDim = ndx.dimension(function(d) {
-            return (d.date.getDay()+1);
+            return (d.date.getUTCDate());
         });
         var dayGrp = dayDim.group();
 
@@ -187,22 +187,7 @@ $(document).ready(function(){
 **********************************************************************************************************************************/
 		sliderDate.sort(function(a, b){return a-b});
 		var dateFirst = sliderDate[0];
-		var dateLast = sliderDate[sliderDate.length-1]; 
-/*
-		d3.select("#slider-range")
-            .call(d3.slider()
-				.axis(true)
-				.min(sliderDate[0])
-				.max(sliderDate[sliderDate.length-1])
-				.value(sliderDate)
-		        .on("slide",function(evt,value){
-		            console.log(value)
-		            d3.select("#slidertextmin").text(Math.floor(value));
-		            d3.select("#slidertextmax").text(Math.floor(value[1]));
-				})
-			)
-*/
-		
+		var dateLast = sliderDate[sliderDate.length-1]; 		
 		$( "#slider-range" ).slider({
 			range: true,
 			min: dateFirst,
@@ -244,7 +229,7 @@ $(document).ready(function(){
                     label: 'Date <img src="arrow.png" height="10" width="10" onclick="sortB('+"'date'"+')">',
                     format: function (d) {
             			var formato = d3.format('02d');
-						return '<a>'+d.date.getFullYear() + ' / ' + formato((d.date.getMonth() + 1)) + ' / ' + formato(d.date.getDay()+1)+'</a>';
+						return '<a>'+d.date.getFullYear() + ' / ' + formato((d.date.getMonth() + 1)) + ' / ' + formato(d.date.getUTCDate())+'</a>';
                     }
                 },
                 {
