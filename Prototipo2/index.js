@@ -1,11 +1,22 @@
 var aging = {};
 var birth = {};
 var check = [];
+var idBox = [];
+var dateBox = {'year': [], 'month': [], 'day': []};
+var nameBox = [];
+var retainedBox = [];
+var companyBox = [];
+var tzBox = [];
 var table;
 var idDim;
-var stillDim;
+var retainedDim;
 var compDim;
 var tzDim;
+var nameDim;
+var yearDim;
+var monthDim;
+var dayDim;
+var fullDateDim;
 $(document).ready(function(){
     var stillNoStillChart = dc.pieChart('#still-nostill-chart');
     var monthChart = dc.pieChart('#month-chart');
@@ -14,6 +25,10 @@ $(document).ready(function(){
 	var yearChart = dc.pieChart('#year-chart');
     var tzCharts = dc.rowChart('#time-zone-chart');
 	var companyChart = dc.rowChart('#company-chart');
+	var idChart = dc.lineChart('#forId');
+	var stillChart = dc.lineChart('#forStill');
+	var dateChart = dc.lineChart('#forDate');
+	var dayOfWeekChart = dc.pieChart('#day-Of-Week');
 	table = dc.dataTable('.dc-data-table');
     $.when(
 		// Load agin json file
@@ -39,17 +54,14 @@ $(document).ready(function(){
 		    d.one = 1; // value 1 for each data
 			d.day = initDate-d.age;
 		    d.date = dateFormat.parse(dateFormat(new Date(1970, 0, d.day)));
-			sliderDate.push(d.date.getFullYear());
+			sliderDate.push(d.day);
 		});
 /*********************************************************************************************************************************
-**************************************************** Pie -> Still VS No Still ****************************************************
+************************************************* Pie -> retained VS No retained *************************************************
 *********************************************************************************************************************************/
-		// Used for click
-		stillDim = ndx.dimension(function(d) {
-			return d.still;
-		});
+		
         var sNsDim = ndx.dimension(function (d) {
-            return d.nostill > d.still ?  'No': 'Yes';
+            return d.noretained > d.retained ?  'No': 'Yes';
         });
         var sNsGrp = sNsDim.group();
         stillNoStillChart
@@ -71,7 +83,7 @@ $(document).ready(function(){
 /*********************************************************************************************************************************
 *********************************************************** Pie -> Year **********************************************************
 *********************************************************************************************************************************/
-		var yearDim = ndx.dimension(function(d) {
+		yearDim = ndx.dimension(function(d) {
             return d.date.getFullYear();
         });
         var yearGrp = yearDim.group().reduceSum(function(d) {
@@ -86,7 +98,7 @@ $(document).ready(function(){
 /*********************************************************************************************************************************
 ****************************************************** Pie (Donuts) -> Month *****************************************************
 *********************************************************************************************************************************/
-        var monthDim = ndx.dimension(function(d) {
+        monthDim = ndx.dimension(function(d) {
             return d.date.getMonth()+1;
         });
         var monthGrp = monthDim.group().reduceSum(function(d) {
@@ -99,9 +111,40 @@ $(document).ready(function(){
             .dimension(monthDim)
             .group(monthGrp);
 /*********************************************************************************************************************************
+*************************************************** Pie (Donuts) -> Day of Week **************************************************
+*********************************************************************************************************************************/
+        var dayOfWeekDim = ndx.dimension(function(d) {
+			var name;
+			if (d.date.getDay() == 0){
+				name = 'Monday';
+			} else if (d.date.getDay() == 1){
+				name = 'Tuesday';
+			} else if (d.date.getDay() == 2){
+				name = 'Wednesday';
+			} else if (d.date.getDay() == 3){
+				name = 'Thursday';
+			} else if (d.date.getDay() == 4){
+				name = 'Friday';
+			} else if (d.date.getDay() == 5){
+				name = 'Saturday';
+			} else if (d.date.getDay() == 6){
+				name = 'Sunday';
+			}
+            return name;
+        });
+        var dayOfWeekGrp = dayOfWeekDim.group().reduceSum(function(d) {
+            return d.one;
+        });
+        dayOfWeekChart.width(180)
+            .height(180)
+            .radius(80)
+            .innerRadius(30)
+            .dimension(dayOfWeekDim)
+            .group(dayOfWeekGrp);
+/*********************************************************************************************************************************
 *********************************************************** Bar -> Day ***********************************************************
 *********************************************************************************************************************************/
-        var dayDim = ndx.dimension(function(d) {
+        dayDim = ndx.dimension(function(d) {
             return (d.date.getUTCDate());
         });
         var dayGrp = dayDim.group();
@@ -182,46 +225,144 @@ $(document).ready(function(){
 				return d.key;
 			})
 			.title(function(d) { return d.key+' -> '+d.value})
-/*********************************************************************************************************************************
-************************************************************** Slider ************************************************************
-**********************************************************************************************************************************/
-		sliderDate.sort(function(a, b){return a-b});
-		var dateFirst = sliderDate[0];
-		var dateLast = sliderDate[sliderDate.length-1]; 		
-		$( "#slider-range" ).slider({
-			range: true,
-			min: dateFirst,
-			max: dateLast,
-			values: [ dateFirst, dateLast ],
-			slide: function( event, ui ) {
-				yearDim.filter(function (d){
-					if ((d > ui.values[0]-1) && (d < ui.values[1]+1)){
-						return d;
-					}
-				});
-				dc.redrawAll();
-				$( "#amount" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
-			}
-		});
-		$( "#amount" ).val($( "#slider-range" ).slider( "values", 0 ) + " - " + $( "#slider-range" ).slider( "values", 1 ) );
 // ---------------------------- Reset All charts and dataTable -------------------------------------
         dc.dataCount('.dc-data-count')
             .dimension(ndx)
             .group(all)
             .html({
                 some:'<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
-                    ' | <a href=\'javascript:dc.filterAll(); dc.renderAll();\'\'>Reset All</a>',
+                    ' | <a onclick="resetAll()">Reset All</a>',
                 all:'All records selected. Please click on the graph to apply filters.'	
             });
 /*********************************************************************************************************************************
+*********************************************************** Hide Chart ***********************************************************
+**********************************************************************************************************************************/
+		idDim = ndx.dimension(function (d) {return d.id});
+		var idGrp = idDim.group().reduceSum(function(d) {
+			return Math.floor(d.id/1000)
+        });
+        idChart
+            .width(100)
+			.height(100)
+			.x(d3.scale.linear().domain([0,20]))
+			.renderArea(true)
+			.brushOn(false)
+			.renderDataPoints(true)
+			.clipPadding(10)
+			.dimension(idDim)
+			.group(idGrp);
+		retainedDim = ndx.dimension(function(d) {
+			return d.retained;
+		});
+		var stillGrp = retainedDim.group().reduceSum(function(d) {
+			return d.one;
+		});
+		stillChart
+            .width(100)
+			.height(100)
+			.x(d3.scale.linear().domain([0,20]))
+			.renderArea(true)
+			.brushOn(false)
+			.renderDataPoints(true)
+			.clipPadding(10)
+			.dimension(retainedDim)
+			.group(stillGrp);
+
+		fullDateDim = ndx.dimension(function(d) {
+			return d.date;
+		});
+		var fullDateGrp = fullDateDim.group().reduceSum(function(d) {
+			return d.year;
+		});
+		dateChart
+            .width(100)
+			.height(100)
+			.x(d3.scale.linear().domain([0,20]))
+			.renderArea(true)
+			.brushOn(false)
+			.renderDataPoints(true)
+			.clipPadding(10)
+			.dimension(fullDateDim)
+			.group(fullDateGrp);
+/*********************************************************************************************************************************
+************************************************************ Calendar ************************************************************
+**********************************************************************************************************************************/
+		sliderDate.sort(function(a, b){return a-b});
+		var from;
+		var to;
+		$( "#from" ).datepicker({
+			changeMonth: true,
+			changeYear: true,
+			numberOfMonths: 1,
+			onClose: function( selectedDate ) {
+				$( "#to" ).datepicker( "option", "minDate", selectedDate );
+				var ageFrom = ((new Date(parseInt(selectedDate.split('/')[2]), parseInt(selectedDate.split('/')[0]), parseInt(selectedDate.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24));
+				if (to == undefined){
+					sliderDate[sliderDate.length-1]
+				}else{
+					var ageTo = ((new Date(parseInt(to.split('/')[2]), parseInt(to.split('/')[0]), parseInt(to.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24));
+				}
+console.log($( "#slider-range" ).slider( "option", "min"))
+				$("#slider-range").slider("option", "values", [Math.floor(ageFrom), Math.floor(ageTo)]);
+				from = selectedDate;
+				if (to != undefined){
+					calendarFilter(from, to);
+				}
+			}
+		});
+		$( "#to" ).datepicker({
+			changeMonth: true,
+			changeYear: true,
+			numberOfMonths: 1,
+			onClose: function( selectedDate ) {
+				$( "#from" ).datepicker( "option", "maxDate", selectedDate );
+				if (from == undefined){
+					sliderDate[0];
+				}else{
+					var ageFrom = ((new Date(parseInt(from.split('/')[2]), parseInt(from.split('/')[0]), parseInt(from.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24));
+				}
+				var ageTo = ((new Date(parseInt(selectedDate.split('/')[2]), parseInt(selectedDate.split('/')[0]), parseInt(selectedDate.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24));
+
+				$("#slider-range").slider("option", "values", [Math.floor(ageFrom), Math.floor(ageTo)]);
+				to = selectedDate;
+				if (from != undefined){
+					calendarFilter(from, to);
+				}
+			}
+		});
+/*********************************************************************************************************************************
+************************************************************** Slider ************************************************************
+**********************************************************************************************************************************/
+		$( "#slider-range" ).slider({
+			range: true,
+			min: sliderDate[0],
+			max: sliderDate[sliderDate.length-1],
+			values: [sliderDate[0], sliderDate[sliderDate.length-1]],
+			slide: function( event, ui ) {
+				var initDate = dateFormat.parse(dateFormat(new Date(1970, 0, ui.values[0])));
+				var finalDate = dateFormat.parse(dateFormat(new Date(1970, 0, ui.values[1])));
+				var initMonth = initDate.getMonth()+1;
+				var finalMonth = finalDate.getMonth()+1;
+				var from = initMonth+'/'+initDate.getUTCDate()+'/'+initDate.getFullYear();
+				var to = finalMonth+'/'+finalDate.getUTCDate()+'/'+finalDate.getFullYear();
+				$('#from').val(from);
+				$('#to').val(to);
+				calendarFilter(from, to);
+				/*yearDim.filter(function (d){
+					if ((d > ui.values[0]-1) && (d < ui.values[1]+1)){
+						return d;
+					}
+				});*/
+			}
+		});
+/*********************************************************************************************************************************
 ************************************************************ DataTable ***********************************************************
 **********************************************************************************************************************************/
-        var nameDimension = ndx.dimension(function (d) {
+        nameDim = ndx.dimension(function (d) {
             return d.name;
         });
-		idDim = ndx.dimension(function (d) {return d.id});
         table
-            .dimension(nameDimension)
+            .dimension(nameDim)
             .group(function (d) {return "";})
             .size(20)
             .columns([
@@ -232,10 +373,23 @@ $(document).ready(function(){
 						return '<a>'+d.date.getFullYear() + ' / ' + formato((d.date.getMonth() + 1)) + ' / ' + formato(d.date.getUTCDate())+'</a>';
                     }
                 },
+				{
+					label: '<button onclick="columnFilter('+"'date'"+')">Filter</button>',
+					format: function (d){
+						var format = d3.format('02d');
+						return '<input class="checkDate" type="checkbox" id="'+d.date.getFullYear()+'-'+d.date.getMonth()+'-'+d.date.getUTCDate()+'_'+d.id+'">';
+					}
+				},
                 {
 					label: 'Id <img src="arrow.png" height="10" width="10" onclick="sortB('+"'id'"+')">',
 					format: function (d) {
 						return d.id;
+					}
+				},
+				{
+					label: '<button onclick="columnFilter('+"'id'"+')">Filter</button>',
+					format: function (d) {
+						return '<input class="checkId" type="checkbox" id="'+d.id+'">';
 					}
 				},
                 {
@@ -245,13 +399,25 @@ $(document).ready(function(){
 					}
 				},
 				{
-					label: '<a class="still">Still</a> <img src="arrow.png" height="10" width="10" onclick="sortB('+"'still'"+')">',
+					label: '<button onclick="columnFilter('+"'name'"+')">Filter</button>',
 					format: function (d) {
-						if (d.still == 1){
+						return '<input class="checkName" type="checkbox" id="name'+d.id+'">';
+					}
+				},
+				{
+					label: '<a class="retained">Retained</a> <img src="arrow.png" height="10" width="10" onclick="sortB('+"'retained'"+')">',
+					format: function (d) {
+						if (d.retained == 1){
 							return '<a>YES</a>';
 						}else{
 							return '<a>NO</a>';
 						}
+					}
+				},
+				{
+					label: '<button onclick="columnFilter('+"'retained'"+')">Filter</button>',
+					format: function (d) {
+						return '<input class="checkRetained" type="checkbox" id="'+d.retained+'_'+d.id+'r">';
 					}
 				},
 				{
@@ -261,15 +427,21 @@ $(document).ready(function(){
 					}
 				},
 				{
+					label: '<button onclick="columnFilter('+"'company'"+')">Filter</button>',
+					format: function (d) {
+						return '<input class="checkCompany" type="checkbox" id="'+d.company+'_'+d.id+'">';	
+					} 
+				},
+				{
 					label: '<a class="tz">TZ</a> <img src="arrow.png" height="10" width="10" onclick="sortB('+"'tz'"+')">',
 					format: function (d) {
 						return '<a>'+d.TZ+'</a>';
 					}
 				},
 				{
-					label: 'Select',
+					label: '<button onclick="columnFilter('+"'tz'"+')">Filter</button>',
 					format: function (d) {
-						return '<input class="checktable" type="checkbox" id="'+d.id+'">'
+						return '<input class="checkTZ" type="checkbox" id="'+d.TZ+'_'+d.id+'">';
 					}
 				}
             ])
@@ -280,14 +452,16 @@ $(document).ready(function(){
 
 		table.on('renderlet', function(table) {
 			table.selectAll('.dc-table-group').classed('info', true);
-			// ---------------------------- Click Still -------------------------------------
-			table.selectAll('.dc-table-head .still').on('click', function(d){
+			// ---------------------------- Click Retained -------------------------------------
+			table.selectAll('.dc-table-head .retained').on('click', function(d){
 				var html = '';
 				$('#pop').show();
-				html = '<strong>Still VS No Still</strong><br>'
+				closeDate();
+				closeProfile();
+				html = '<strong>Retained</strong><br>'
 				var still = sNsGrp.top(Infinity);
 				$.each(still, function(i, d){
-					html += '<a onclick="tableFilter('+"'still', "+"'"+d.key.toString()+"'"+')">' + d.key + ': ' + d.value + '</a><br>';
+					html += '<a onclick="tableFilter('+"'retained', "+"'"+d.key.toString()+"'"+')">' + d.key + ': ' + d.value + '</a><br>';
 				});
 				$('#pop').html(html+'<button onclick="closePop()">Close</button>');
 			});
@@ -295,9 +469,11 @@ $(document).ready(function(){
 			table.selectAll('.dc-table-head .company').on('click', function(d){
 				var html = '';
 				$('#pop').show();
+				closeDate();
+				closeProfile();
 				html = '<strong>Company</strong><br>'
-				var still = compGrp.top(Infinity);
-				$.each(still, function(i, d){
+				var comp = compGrp.top(Infinity);
+				$.each(comp, function(i, d){
 					html += '<a onclick="tableFilter('+"'company', "+"'"+d.key.toString()+"'"+')">' + d.key + ': ' + d.value + '</a><br>';
 				});
 				$('#pop').html(html+'<button onclick="closePop()">Close</button>');
@@ -306,9 +482,11 @@ $(document).ready(function(){
 			table.selectAll('.dc-table-head .tz').on('click', function(d){
 				var html = '';
 				$('#pop').show();
+				closeDate();
+				closeProfile();
 				html = '<strong>Time Zone</strong><br>'
-				var still = tzGrp.top(Infinity);
-				$.each(still, function(i, d){
+				var tzs = tzGrp.top(Infinity);
+				$.each(tzs, function(i, d){
 					html += '<a onclick="tableFilter('+"'tz', "+"'"+d.key.toString()+"'"+')">' + d.key + ': ' + d.value + '</a><br>';
 				});
 				$('#pop').html(html+'<button onclick="closePop()">Close</button>');
@@ -317,36 +495,97 @@ $(document).ready(function(){
 			table.selectAll(".dc-table-column._0").on("click", function(d){
 				var year = d.date.getFullYear();
 				var month = d.date.getMonth()+1;
-				var day = d.date.getDay()+1;
+				var day = d.date.getUTCDate();
 				$('#show-date').show();
+				closePop();
+				closeProfile();
 				$('#clickYear').html(year);
 				$('#clickMonth').html(month);
 				$('#clickDay').html(day);
 			});
 			// ---------------------------- Third column, Name ---------------------------------------
-			table.selectAll(".dc-table-column._2").on("click", function(d){
-				clickRow(d.date, d.id, d.name, d.still, d.TZ, d.company);
+			table.selectAll(".dc-table-column._4").on("click", function(d){
+				closeDate();
+				closePop();
+				clickRow(d.date, d.id, d.name, d.retained, d.TZ, d.company);
 			});
-			// ---------------------------- Fourth column, Still -------------------------------------
-			table.selectAll(".dc-table-column._3").on("click", function(d){
-				tableFilter('still', d.still);
+			// ---------------------------- Fourth column, retained -------------------------------------
+			table.selectAll(".dc-table-column._6").on("click", function(d){
+				tableFilter('retained', d.retained);
 			});
 			// ---------------------------- Fifth column, Company ------------------------------------
-			table.selectAll(".dc-table-column._4").on("click", function(d){
+			table.selectAll(".dc-table-column._8").on("click", function(d){
 				tableFilter('company', d.company);
 			});
 			// ---------------------------- Sixth column, Time zone ----------------------------------
-			table.selectAll(".dc-table-column._5").on("click", function(d){
+			table.selectAll(".dc-table-column._10").on("click", function(d){
 				tableFilter('tz', d.TZ);
 			});
-			// ---------------------------- Seventh column, CheckBox ---------------------------------
-			$(".checktable").each(function(index, d){
+			// ---------------------------- Id, CheckBox ---------------------------------
+			$(".checkId").each(function(index, d){
 				$('#'+d.id).click(function() {
 					if ($(this).is(':checked')) {
-						check.push(d.id);
+						idBox.push(parseInt(d.id));
 					}else{
-						var i = check.indexOf(d.id);
-						check.splice(i, 1)
+						var i = idBox.indexOf(d.id);
+						idBox.splice(i, 1);
+					}
+				});
+			});
+			// ---------------------------- Date, CheckBox ---------------------------------
+			$(".checkDate").each(function(index, d){
+				$('#'+d.id).click(function() {
+					var year = parseInt(d.id.split('-')[0]);
+					var month = parseInt(d.id.split('-')[1])+1;
+					var day = parseInt(d.id.split('-')[2].split('_')[0]);
+					if ($(this).is(':checked')) {
+						
+						dateBox['year'].push(year);
+						dateBox['month'].push(month);
+						dateBox['day'].push(day);
+					}else{
+						var i = dateBox['year'].indexOf(year);
+						dateBox['year'].splice(i, 1);
+						var j = dateBox['month'].indexOf(month);	
+						dateBox['month'].splice(j, 1);
+						var k = dateBox['day'].indexOf(day);
+						dateBox['day'].splice(k, 1);
+					}
+				});
+			});
+			// ---------------------------- Retained, CheckBox ---------------------------------
+			$(".checkRetained").each(function(index, d){
+				$('#'+d.id).click(function() {
+					var retained = parseInt(d.id.split("_")[0]);
+					if ($(this).is(':checked')) {
+						retainedBox.push(retained);
+					}else{
+						var i = retainedBox.indexOf(retained);
+						retainedBox.splice(i, 1);
+					}
+				});
+			});
+			// ---------------------------- Company, CheckBox ---------------------------------
+			$(".checkCompany").each(function(index, d){
+				$('#'+d.id).click(function() {
+					var company = d.id.split("_")[0];
+					if ($(this).is(':checked')) {
+						companyBox.push(company);
+					}else{
+						var i = companyBox.indexOf(company);
+						companyBox.splice(i, 1);
+					}
+				});
+			});
+			// ---------------------------- Time Zone, CheckBox ---------------------------------
+			$(".checkTZ").each(function(index, d){
+				$('#'+d.id).click(function() {
+					var tz = parseInt(d.id.split("_")[0]);
+					if ($(this).is(':checked')) {
+						tzBox.push(tz);
+					}else{
+						var i = tzBox.indexOf(tz);
+						tzBox.splice(i, 1);
 					}
 				});
 			});
@@ -384,7 +623,7 @@ $(document).ready(function(){
 ********************************************************** Table Search **********************************************************
 *********************************************************************************************************************************/
 		$("#table-search").on('input',function(){
-			text_filter(nameDimension, this.value);
+			text_filter(nameDim, this.value);
 			function text_filter(dim, q){
 				table.filterAll();
 				var re = new RegExp(q,"i")
@@ -430,6 +669,7 @@ function birAgin(d1, d2){
 	var sigue = [];
 	var nosigue = [];
 	var tz = [];
+	var companies = ['IBM', 'Oracle', 'Wikipedia', 'Libresoft', 'HP', 'Nebula'];
 	var company =  [];
 	$.each(d1, function(key, val){
 		if (key == 'id'){
@@ -444,8 +684,8 @@ function birAgin(d1, d2){
 	for (var i=0; i<value1[0].length; i++){
 		var TZ = Math.floor(Math.random() * (13 + 12) - 12);
 		tz.push(TZ);
-		var Company = Math.floor(Math.random()*7);
-		company.push(Company);
+		var index = Math.floor(Math.random()*6);
+		company.push(companies[index]);
 		var yes = 0;
 		var no = 1;
 		if(value2[0].indexOf(value1[0][i]) != -1){
@@ -457,8 +697,8 @@ function birAgin(d1, d2){
 	}
 	d1['TZ'] = tz;
 	d1['company'] = company;
-	d1['still'] = sigue;
-	d1['nostill'] = nosigue;
+	d1['retained'] = sigue;
+	d1['noretained'] = nosigue;
 	return d1
 }
 /*********************************************************************************************************************************
@@ -476,15 +716,15 @@ function closePop(){
 /*********************************************************************************************************************************
 **************************************************** Onclick on the table row ****************************************************
 *********************************************************************************************************************************/
-function clickRow(date, id, name, still, TZ, company){
+function clickRow(date, id, name, retained, TZ, company){
 	var aux;
-	if (still == 0){
+	if (retained == 0){
 		aux = "NO";
 	}else{
 		aux = "YES";
 	}
 	$('#profile').show();
-	$("#profile").html('<strong>Profile</strong><br>Name: '+name+' Id: '+id+'<br>Company: '+company+' Still: '+aux+'<br>Date: '+date.toString().split("00:00")[0]+' Time Zone: '+TZ+'<br><button onclick="closeProfile()">Close</button>');
+	$("#profile").html('<strong>Profile</strong><br>Name: '+name+' Id: '+id+'<br>Company: '+company+' Retained: '+aux+'<br>Date: '+date.toString().split("00:00")[0]+' Time Zone: '+TZ+'<br><button onclick="closeProfile()">Close</button>');
 }
 /*********************************************************************************************************************************
 ********************************************************** SortBy Click **********************************************************
@@ -511,9 +751,9 @@ function sortB(d) {
 		table.sortBy(function (d2){
 			return d2.TZ;
 		});
-	}else if (d == "still"){
+	}else if (d == "retained"){
 		table.sortBy(function(d2){
-			return d2.still;
+			return d2.retained;
 		});
 	}
 	dc.redrawAll();
@@ -535,18 +775,83 @@ function filt(){
 	check = [];
 }
 /*********************************************************************************************************************************
+****************************************************** Column Filter Click *******************************************************
+*********************************************************************************************************************************/
+function columnFilter(type){
+//	dc.filterAll();
+	table.filterAll();
+	var array = [];
+	var dim;
+	if (type == 'date'){
+		array = arrayFilter(dateBox['year']);
+		dimFilter(yearDim, array);
+		array = arrayFilter(dateBox['month']);
+		dimFilter(monthDim, array);
+		array = arrayFilter(dateBox['day']);
+		dimFilter(dayDim, array);
+	} else if (type == 'id'){
+		array = idBox;
+		dim = idDim;
+	} else if (type == 'name'){
+		array = nameBox;
+		dim = nameDim;
+	} else if (type == 'retained'){
+		array = arrayFilter(retainedBox);
+		if (array.length = 1){
+			retainedDim.filter(array[0]);
+		}else{
+			array = [];
+		}
+	} else if (type == 'company'){
+		dim = compDim;
+		array = arrayFilter(companyBox);
+	} else if (type == 'tz'){
+		dim = tzDim;
+		array = arrayFilter(tzBox)
+	}
+	if ((type != 'retained') && (type != 'date')){
+		dimFilter(dim, array);
+	}
+	dc.redrawAll();
+	dateBox = {'year': [], 'month': [], 'day': []};
+	idBox = [];
+	nameBox = [];
+	retainedBox = [];
+	companyBox = [];
+	tzBox = [];
+	check = [];
+}
+function arrayFilter(checked) {
+	var array = [];
+	for(var i=0; i<checked.length; i++){
+		if ((array.length == 0) || (array.indexOf(checked[i]) == -1)){
+			array.push(checked[i]);
+		}
+	}
+	return array;
+}
+function dimFilter(dim, array){
+	if (array.length > 0){
+		dim.filter(function (d){
+			if (array.indexOf(d) != -1){
+				return d;
+			}
+		});
+	}
+}
+/*********************************************************************************************************************************
 ********************************************************** Table Filter **********************************************************
 *********************************************************************************************************************************/
 function tableFilter(type, data){
 	closePop();
 	table.filterAll();
-	if (type == 'still'){
+	if (type == 'retained'){
 		if (data == 'Yes'){
-			stillDim.filter(1);
+			retainedDim.filter(1);
 		} else if (data == 'No'){
-			stillDim.filter(0);
+			retainedDim.filter(0);
 		} else {
-			stillDim.filter(data);
+			retainedDim.filter(data);
 		}
 	}else if (type == 'company'){
 		compDim.filter(data);
@@ -554,4 +859,42 @@ function tableFilter(type, data){
 		tzDim.filter(data);
 	}
 	dc.redrawAll();
+}
+/*********************************************************************************************************************************
+******************************************************** Calendar Filter *********************************************************
+*********************************************************************************************************************************/
+function calendarFilter(from, to){
+console.log(from)
+console.log(to)
+	fullDateDim.filter(function (d){
+		// FromYear < YEAR > ToYear
+		if ((d.getFullYear() > parseInt(from.split('/')[2])) && (d.getFullYear() < parseInt(to.split('/')[2]))){
+			return d;
+		// "YEAR = FromYear" and "MONTH >= fromMonth"
+		} else if ((d.getFullYear() == parseInt(from.split('/')[2])) &&
+					(d.getUTCDate() >= parseInt(from.split('/')[1]))){
+			return d;
+		// "YEAR = FromYear" and "MONTH = FromMonth" and "DAY >= FromDay"
+		} else if ((d.getFullYear() == parseInt(from.split('/')[2])) && 
+					(d.getMonth()+1 == parseInt(from.split('/')[0])) &&
+					(d.getUTCDate() >= parseInt(from.split('/')[1]))){
+			return d;
+		// "YEAR = ToYear" and "MONTH <= ToMonth"
+		} else if ((d.getFullYear() == parseInt(to.split('/')[2])) &&
+					(d.getMonth()+1 <= parseInt(to.split('/')[0]))){
+			return d;
+		// "YEAR = ToYear" and "MONTH = ToMonth" and "DAY <= ToDay"
+		} else if ((d.getFullYear() == parseInt(to.split('/')[2])) && 
+					(d.getMonth()+1 == parseInt(to.split('/')[0])) &&
+					(d.getUTCDate() <= parseInt(to.split('/')[1]))){
+			return d;
+		}
+	});
+	dc.redrawAll();
+}
+function resetAll(){
+	dc.filterAll();
+	dc.renderAll();
+	$('#from').val(" ");
+	$('#to').val(" ");
 }

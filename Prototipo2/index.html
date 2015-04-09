@@ -38,6 +38,11 @@
                     <strong>Month</strong>
                     <div class="clearfix"></div>
                 </div>
+		
+				<div id="day-Of-Week">
+                    <strong>Days Of the Week</strong>
+                    <div class="clearfix"></div>
+                </div>
 			</div>
 
 			<div class="row">
@@ -61,16 +66,23 @@
                 </div>
 
 				<div id="company-chart">
-					<strong>Companys</strong>
+					<strong>Companies</strong>
 					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
                     <div class="clearfix"></div>
 				</div>
 			</div>
-
+			<div style="display: none; z-index: 1;">
+				<div id="forId"></div>
+				<div id="forStill"></div>
+				<div id="forDate"></div>
+			</div>
             <div class="row">
 				<hr>
-				<label for="amount" style="float:left">Date range:</label>
-				<input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold; width:75px; height:15px;">
+				<label for="from" style="float: left;"><strong>Date range:</strong> from</label>
+				<input type="text" id="from" name="from" value=" " style="float: left; width:75px; height:15px;">
+				<label for="to" style="float: left;"> to</label>
+				<input type="text" id="to" name="to" value=" " style="width:75px; height:15px;">
+				<br>
 				<div id="slider-range" style="z-index:1;"></div><br>
                 <div class="dc-data-count">
                     <span class="filter-count"></span> selected out of <span class="total-count"></span> records | <a 
@@ -82,8 +94,8 @@
 	            <table class="table table-hover dc-data-table"></table>
             </div>
         </div>
-		<div id="profile" style="display: none; z-index:2;"></div>
-		<div id="show-date" style="display: none; z-index:2;">
+		<div id="profile" style="display: none; z-index: 2;"></div>
+		<div id="show-date" style="display: none; z-index: 2;">
 			<strong>Date</strong><br>
 			Year: <a id="clickYear"></a><br>
 			Month: <a id="clickMonth"></a><br>
