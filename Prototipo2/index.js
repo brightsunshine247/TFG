@@ -7,6 +7,8 @@ var nameBox = [];
 var retainedBox = [];
 var companyBox = [];
 var tzBox = [];
+var andOrBox = {'date': dateBox, 'id': idBox, 'name': nameBox, 'retained': retainedBox, 'company': companyBox, 'tz': tzBox};
+var sliderDate = [];
 var table;
 var idDim;
 var retainedDim;
@@ -25,9 +27,9 @@ $(document).ready(function(){
 	var yearChart = dc.pieChart('#year-chart');
     var tzCharts = dc.rowChart('#time-zone-chart');
 	var companyChart = dc.rowChart('#company-chart');
-	var idChart = dc.lineChart('#forId');
-	var stillChart = dc.lineChart('#forStill');
-	var dateChart = dc.lineChart('#forDate');
+//	var idChart = dc.lineChart('#forId');
+//	var stillChart = dc.lineChart('#forStill');
+//	var dateChart = dc.lineChart('#forDate');
 	var dayOfWeekChart = dc.pieChart('#day-Of-Week');
 	table = dc.dataTable('.dc-data-table');
     $.when(
@@ -49,7 +51,6 @@ $(document).ready(function(){
 		var dateFormat = d3.time.format('%Y-%m-%dT%H:%M:%S');
 		var format = dateFormat.parse(birth['date']);
 		var initDate = ((new Date(format.getFullYear(), format.getMonth(), format.getDay())-new Date(1970, 0, 0))/(1000*60*60*24));
-		var sliderDate = [];
         data.forEach(function (d) {
 		    d.one = 1; // value 1 for each data
 			d.day = initDate-d.age;
@@ -235,55 +236,15 @@ $(document).ready(function(){
                 all:'All records selected. Please click on the graph to apply filters.'	
             });
 /*********************************************************************************************************************************
-*********************************************************** Hide Chart ***********************************************************
+***************************************************** Necesaries Dimensions ******************************************************
 **********************************************************************************************************************************/
 		idDim = ndx.dimension(function (d) {return d.id});
-		var idGrp = idDim.group().reduceSum(function(d) {
-			return Math.floor(d.id/1000)
-        });
-        idChart
-            .width(100)
-			.height(100)
-			.x(d3.scale.linear().domain([0,20]))
-			.renderArea(true)
-			.brushOn(false)
-			.renderDataPoints(true)
-			.clipPadding(10)
-			.dimension(idDim)
-			.group(idGrp);
 		retainedDim = ndx.dimension(function(d) {
 			return d.retained;
 		});
-		var stillGrp = retainedDim.group().reduceSum(function(d) {
-			return d.one;
-		});
-		stillChart
-            .width(100)
-			.height(100)
-			.x(d3.scale.linear().domain([0,20]))
-			.renderArea(true)
-			.brushOn(false)
-			.renderDataPoints(true)
-			.clipPadding(10)
-			.dimension(retainedDim)
-			.group(stillGrp);
-
 		fullDateDim = ndx.dimension(function(d) {
 			return d.date;
 		});
-		var fullDateGrp = fullDateDim.group().reduceSum(function(d) {
-			return d.year;
-		});
-		dateChart
-            .width(100)
-			.height(100)
-			.x(d3.scale.linear().domain([0,20]))
-			.renderArea(true)
-			.brushOn(false)
-			.renderDataPoints(true)
-			.clipPadding(10)
-			.dimension(fullDateDim)
-			.group(fullDateGrp);
 /*********************************************************************************************************************************
 ************************************************************ Calendar ************************************************************
 **********************************************************************************************************************************/
@@ -348,11 +309,6 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 				$('#from').val(from);
 				$('#to').val(to);
 				calendarFilter(from, to);
-				/*yearDim.filter(function (d){
-					if ((d > ui.values[0]-1) && (d < ui.values[1]+1)){
-						return d;
-					}
-				});*/
 			}
 		});
 /*********************************************************************************************************************************
@@ -397,13 +353,13 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 					format: function (d) {
 						return '<a>'+d.name+'</a>';
 					}
-				},
+				},/*
 				{
 					label: '<button onclick="columnFilter('+"'name'"+')">Filter</button>',
 					format: function (d) {
 						return '<input class="checkName" type="checkbox" id="name'+d.id+'">';
 					}
-				},
+				},*/
 				{
 					label: '<a class="retained">Retained</a> <img src="arrow.png" height="10" width="10" onclick="sortB('+"'retained'"+')">',
 					format: function (d) {
@@ -526,9 +482,11 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 				$('#'+d.id).click(function() {
 					if ($(this).is(':checked')) {
 						idBox.push(parseInt(d.id));
+						andOrBox['id'] = idBox;
 					}else{
 						var i = idBox.indexOf(d.id);
 						idBox.splice(i, 1);
+						andOrBox['id'] = idBox;
 					}
 				});
 			});
@@ -539,10 +497,10 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 					var month = parseInt(d.id.split('-')[1])+1;
 					var day = parseInt(d.id.split('-')[2].split('_')[0]);
 					if ($(this).is(':checked')) {
-						
 						dateBox['year'].push(year);
 						dateBox['month'].push(month);
 						dateBox['day'].push(day);
+						andOrBox['date'] = dateBox;
 					}else{
 						var i = dateBox['year'].indexOf(year);
 						dateBox['year'].splice(i, 1);
@@ -550,6 +508,7 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 						dateBox['month'].splice(j, 1);
 						var k = dateBox['day'].indexOf(day);
 						dateBox['day'].splice(k, 1);
+						andOrBox['date'] = dateBox;
 					}
 				});
 			});
@@ -559,9 +518,11 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 					var retained = parseInt(d.id.split("_")[0]);
 					if ($(this).is(':checked')) {
 						retainedBox.push(retained);
+						andOrBox['retained'] = retainedBox;
 					}else{
 						var i = retainedBox.indexOf(retained);
 						retainedBox.splice(i, 1);
+						andOrBox['retained'] = retainedBox;
 					}
 				});
 			});
@@ -571,9 +532,11 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 					var company = d.id.split("_")[0];
 					if ($(this).is(':checked')) {
 						companyBox.push(company);
+						andOrBox['company'] = companyBox;
 					}else{
 						var i = companyBox.indexOf(company);
 						companyBox.splice(i, 1);
+						andOrBox['company'] = companyBox;
 					}
 				});
 			});
@@ -583,9 +546,11 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 					var tz = parseInt(d.id.split("_")[0]);
 					if ($(this).is(':checked')) {
 						tzBox.push(tz);
+						andOrBox['tz'] = tzBox;
 					}else{
 						var i = tzBox.indexOf(tz);
 						tzBox.splice(i, 1);
+						andOrBox['tz'] = tzBox;
 					}
 				});
 			});
@@ -666,8 +631,8 @@ function dcFormat(d){
 function birAgin(d1, d2){
 	var value1 = [];
 	var value2 = [];
-	var sigue = [];
-	var nosigue = [];
+	var still = [];
+	var nostill = [];
 	var tz = [];
 	var companies = ['IBM', 'Oracle', 'Wikipedia', 'Libresoft', 'HP', 'Nebula'];
 	var company =  [];
@@ -692,13 +657,13 @@ function birAgin(d1, d2){
 			yes = 1;
 			no = 0;
 		}
-		sigue.push(yes);
-		nosigue.push(no);
+		still.push(yes);
+		nostill.push(no);
 	}
 	d1['TZ'] = tz;
 	d1['company'] = company;
-	d1['retained'] = sigue;
-	d1['noretained'] = nosigue;
+	d1['retained'] = still;
+	d1['noretained'] = nostill;
 	return d1
 }
 /*********************************************************************************************************************************
@@ -730,7 +695,6 @@ function clickRow(date, id, name, retained, TZ, company){
 ********************************************************** SortBy Click **********************************************************
 *********************************************************************************************************************************/
 function sortB(d) {
-	table.filterAll();
 	if (d == 'date'){
 		table.sortBy(function (d2){
 			return d2.date;
@@ -761,18 +725,20 @@ function sortB(d) {
 /*********************************************************************************************************************************
 ********************************************************** Filter Click **********************************************************
 *********************************************************************************************************************************/
-function filt(){
-	dc.filterAll();
-	table.filterAll();
-	if (check.length > 0){
-		idDim.filter(function (d){
-			if (check.indexOf(d.toString()) != -1){
-				return d;
-			}
-		});
-	}
-	dc.redrawAll();
-	check = [];
+function filterAnd(){
+	console.log(andOrBox)
+	columnFilter('date');
+	idBox = andOrBox['id'];
+	columnFilter('id');
+//	nameBox = andOrBox['name'];
+//	columnFilter('name');
+	retainedBox = andOrBox['retained'];
+	columnFilter('retained');
+	companyBox = andOrBox['company'];
+	columnFilter('company');
+	tzBox = andOrBox['tz'];
+	columnFilter('tz');
+	andOrBox = {'date': dateBox, 'id': idBox, 'name': nameBox, 'retained': retainedBox, 'company': companyBox, 'tz': tzBox};
 }
 /*********************************************************************************************************************************
 ****************************************************** Column Filter Click *******************************************************
@@ -864,8 +830,6 @@ function tableFilter(type, data){
 ******************************************************** Calendar Filter *********************************************************
 *********************************************************************************************************************************/
 function calendarFilter(from, to){
-console.log(from)
-console.log(to)
 	fullDateDim.filter(function (d){
 		// FromYear < YEAR > ToYear
 		if ((d.getFullYear() > parseInt(from.split('/')[2])) && (d.getFullYear() < parseInt(to.split('/')[2]))){
@@ -892,9 +856,16 @@ console.log(to)
 	});
 	dc.redrawAll();
 }
+/*********************************************************************************************************************************
+*********************************************************** Reset All ************************************************************
+*********************************************************************************************************************************/
 function resetAll(){
+	idDim.filterAll();
+	retainedDim.filterAll();
+	fullDateDim.filterAll();
 	dc.filterAll();
 	dc.renderAll();
 	$('#from').val(" ");
 	$('#to').val(" ");
+	$("#slider-range").slider("option", "values", [sliderDate[0], sliderDate[sliderDate.length-1]]);
 }
