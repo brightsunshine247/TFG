@@ -466,15 +466,15 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 				clickRow(d.date, d.id, d.name, d.retained, d.TZ, d.company);
 			});
 			// ---------------------------- Fourth column, retained -------------------------------------
-			table.selectAll(".dc-table-column._6").on("click", function(d){
+			table.selectAll(".dc-table-column._5").on("click", function(d){
 				tableFilter('retained', d.retained);
 			});
 			// ---------------------------- Fifth column, Company ------------------------------------
-			table.selectAll(".dc-table-column._8").on("click", function(d){
+			table.selectAll(".dc-table-column._7").on("click", function(d){
 				tableFilter('company', d.company);
 			});
 			// ---------------------------- Sixth column, Time zone ----------------------------------
-			table.selectAll(".dc-table-column._10").on("click", function(d){
+			table.selectAll(".dc-table-column._9").on("click", function(d){
 				tableFilter('tz', d.TZ);
 			});
 			// ---------------------------- Id, CheckBox ---------------------------------
@@ -730,8 +730,6 @@ function filterAnd(){
 	columnFilter('date');
 	idBox = andOrBox['id'];
 	columnFilter('id');
-//	nameBox = andOrBox['name'];
-//	columnFilter('name');
 	retainedBox = andOrBox['retained'];
 	columnFilter('retained');
 	companyBox = andOrBox['company'];
@@ -763,7 +761,7 @@ function columnFilter(type){
 		dim = nameDim;
 	} else if (type == 'retained'){
 		array = arrayFilter(retainedBox);
-		if (array.length = 1){
+		if (array.length == 1){
 			retainedDim.filter(array[0]);
 		}else{
 			array = [];
@@ -787,6 +785,7 @@ function columnFilter(type){
 	tzBox = [];
 	check = [];
 }
+// Filtered repeated entries
 function arrayFilter(checked) {
 	var array = [];
 	for(var i=0; i<checked.length; i++){
@@ -796,6 +795,7 @@ function arrayFilter(checked) {
 	}
 	return array;
 }
+// Filters the dimension
 function dimFilter(dim, array){
 	if (array.length > 0){
 		dim.filter(function (d){

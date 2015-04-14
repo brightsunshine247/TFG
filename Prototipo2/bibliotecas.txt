@@ -1,4 +1,5 @@
 Biblioteca
-C3.js
-NVD3
-rickshaw
+Hacer el autoScroll,
+hacer un prototipo nuevo con el JSON nuevo,
+añadir el filtro OR
+re organizar el panel de filtro.

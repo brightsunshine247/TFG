@@ -50,8 +50,13 @@ Para poder hacer click en dataTable o barChart tenemos que usar las siguientes f
 	chart.on('renderlet', function(_chart) {
 		_chart.selectAll(".dc-table-row").on("click", function(d){...});
 	});
+
 En este aspecto es más complicado si lo comparamos con las bibliotecas de NVd3 o C3 que tienen el evento onclick.
 Y sólo se puede hacer el evento onclick en dataTable o barChart(.brushOn(false)) porque en el chart que se pinta tienen una clase que se llama "dc-table-row" depende de como le hayas llamado a la clase del div para dateTable y "rect" para barChart que esta predefinido para cada elemento del chart en esas clases y se puede hacer dicho evento. 
+
+Incluir filtros en la tabla, para que puedas filtrar directamente en la misma tabla sin ir al chart que quieres de una manera mucho más dinámica, con un checkBox por cada columna menos en la columna del name ya que incluye carácteres especiales que no son válidas para el checkBox. también hemos incluido un filtro aparte del checkBox que es en la parte de fecha( al hacer click en la fecha que queremos aparece una venta con la determinada fecha y se puede filtrar por año, mes y día ).
+Tambien tenemos un filtro AND que hacemos click los checkBox de todas las columnas y se filtrarán todos los datos que estén dentro de ese rango de filtro.
+Por otra parte no se puede filtrar por nombre por tener carácteres especiales, pero si hacemos click en dicho nombre aparecerá el perfil complete de ese usuario.
 
 Prototipo3:
 Uso de las bibliotecas NVD3, d3, crossfilter con los archivos json: its_demographic_aging.json y its_demographic_birth.json.

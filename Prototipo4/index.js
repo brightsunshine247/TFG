@@ -73,7 +73,7 @@ console.log(year_data);
 				// refresh chart_day
 				var new_data_day = refresh(ndx, d.id, 'day_year');
 				var data_day = c3Format('day', new_data_day);
-				data_day.shift();
+//				data_day.shift();
 				chart_day.load({
 					columns:data_day
 				});
@@ -360,7 +360,7 @@ console.log(year_data);
 			}
 		},
 		size: {
-			height: 400,
+			height: 350,
 			width: 450
 		},
 		bindto: d3.select('#year')
@@ -387,7 +387,7 @@ function draw_monthPie(month_data, ndx){
 				// refresh chart_year
 				var new_data_year = refresh(ndx, d.name, 'year_month');
 				var data_year = c3Format('year', new_data_year);
-				data_year.shift();
+//				data_year.shift();
 				chart_year.load({
 					columns: data_year
 				});
@@ -400,7 +400,8 @@ function draw_monthPie(month_data, ndx){
 				// refresh chart_day
 				var new_data_day = refresh(ndx, d.name, 'day_month');
 				var data_day = c3Format('day', new_data_day);
-				data_day.shift();
+//				data_day.shift();
+console.log(data_day);
 				chart_day.load({
 					columns: data_day
 				});
@@ -416,8 +417,8 @@ function draw_monthPie(month_data, ndx){
 			//onmouseout: function (d, i) { console.log("onmouseout", d, i); }
 		},
 		size: {
-			height: 400,
-			width: 450
+			height: 350,
+			width: 350
 		},
 		legend: {
 			item: {
@@ -474,7 +475,7 @@ console.log(d);
 						// refresh chart_year
 						var new_data_year = refresh(ndx, "still", "year_demograph");
 						var new_year = c3Format('year', new_data_year);
-						new_year.shift();
+//						new_year.shift();
 						chart_year.load({
 							columns: new_year
 						});
@@ -487,7 +488,7 @@ console.log(d);
 						// refresh chart_day
 						var new_data_day = refresh(ndx, "still", 'day_demograph');
 						var data_day = c3Format('day', new_data_day);
-						data_day.shift();
+//						data_day.shift();
 						chart_day.load({
 							columns: data_day
 						});
@@ -496,7 +497,7 @@ console.log(d);
 						// refresh chart_year
 						var new_data_year = refresh(ndx, "nostill", "year_demograph");
 						var new_year = c3Format('year', new_data_year);
-						new_year.shift();
+//						new_year.shift();
 						chart_year.load({
 							columns: new_year
 						});
@@ -509,7 +510,7 @@ console.log(d);
 						// refresh chart_day
 						var new_data_day = refresh(ndx, "nostill", 'day_demograph');
 						var data_day = c3Format('day', new_data_day);
-						data_day.shift();
+//						data_day.shift();
 						chart_day.load({
 							columns: data_day
 						});
@@ -530,7 +531,7 @@ console.log(d);
 			}
 		},
 		size: {
-			height: 400,
+			height: 350,
 			width: 450
 		},
 		bindto: d3.select('#demograph')
@@ -540,7 +541,7 @@ console.log(d);
 //------------------------------------------------ DAY PIE DATA ------------------------------------
 function dayPie_data(ndx){
 	var dim = ndx.dimension(function(d) {
-		return d.date.getDay()+1;
+		return d.date.getUTCDate();
 	});
 	var grp = dim.group().reduceSum(function(d) {
 		return d.one;
@@ -553,12 +554,12 @@ function draw_day(data, ndx){
 	chart_day = c3.generate({
 		data: {
 			columns: data,
-			type : 'pie',
+			type : 'bar',
 			onclick: function (d, i) {
 				// refresh chart_year
 				var new_data_year = refresh(ndx, d.name, 'year_day');
 				var data_year = c3Format('year', new_data_year);
-				data_year.shift();
+//				data_year.shift();
 				chart_year.load({
 					columns: data_year
 				});
@@ -582,7 +583,7 @@ function draw_day(data, ndx){
 			//onmouseout: function (d, i) { console.log("onmouseout", d, i); }
 		},
 		size: {
-			height: 400,
+			height: 350,
 			width: 450
 		},
 		legend: {
@@ -593,6 +594,7 @@ function draw_day(data, ndx){
 			}
 		},
 		tooltip: {
+			grouped: false,
 			format: {
 				title: function () {return 'Day';}
 			}
@@ -663,15 +665,16 @@ function c3Format(type, d){
 		result.push(x);
 		result.push(d1);
 		result.push(d2);
-console.log(result);
+//console.log(result);
 	}else{
 		var data = d.top(Infinity);
-		
 		if ((type == 'year') || (type == 'day')){
 			$.each(data, function(index, d){
-				result.push([d.key.toString(), d.value]);
+				if ((d.key != '0') || (d.key != '0000')){
+					result.push([d.key.toString(), d.value]);
+				}
 			});
-			//console.log(result);
+//console.log(result);
 		}else if (type == 'month'){
 			//console.log(data);
 			$.each(data, function(index, d){
@@ -782,7 +785,7 @@ function refresh(data, selectData, opt){
 	}else if (opt == 'day_year'){
 		var dim = data.dimension(function(d){
 			if (d.date.getFullYear() == selectData){
-				return d.date.getDay()+1;
+				return d.date.getUTCDate();
 			}else{
 				return -1;
 			}
@@ -834,7 +837,7 @@ function refresh(data, selectData, opt){
 		var dim = data.dimension(function(d){
 			if (d.date.getMonth() == month){
 				//console.log('a');
-				return d.date.getDay()+1;
+				return d.date.getUTCDate();
 			}else{
 				return 0000;
 			}
@@ -870,9 +873,9 @@ function refresh(data, selectData, opt){
 	}else if(opt == 'day_demograph'){
 		var dim = data.dimension(function(d){
 			if((selectData == "still")&&(d.still == 1)){
-				return d.date.getDay();
+				return d.date.getUTCDate();
 			}else if ((selectData == "nostill") && (d.still == 0)){
-				return d.date.getDay();
+				return d.date.getUTCDate();
 			}else{return 0000;}
 		});
 		var grp = dim.group().reduceSum(function(d){
@@ -881,7 +884,7 @@ function refresh(data, selectData, opt){
 		result = grp;
 	}else if (opt == 'year_day'){
 		var dim = data.dimension(function(d){
-			if (d.date.getDay() == selectData-1){
+			if (d.date.getUTCDate() == selectData){
 				//console.log('a');
 				return d.date.getFullYear();
 			}else{
@@ -894,7 +897,7 @@ function refresh(data, selectData, opt){
 		result = grp;
 	}else if (opt == 'month_day'){
 		var dim = data.dimension(function(d){
-			if (d.date.getDay() == selectData-1){
+			if (d.date.getUTCDate() == selectData){
 				return d.date.getMonth()+1;
 			}else{
 				return -1;
@@ -907,7 +910,7 @@ function refresh(data, selectData, opt){
 	}else if (opt == 'demograph_day'){
 		var axis = [];
 		var dim = data.dimension(function(d){
-			if ((d.still == 0) && (d.date.getDay() == selectData-1)){
+			if ((d.still == 0) && (d.date.getUTCDate() == selectData)){
 				var i = Math.floor(d.age/181);
 				axis[i]=((181*i)+'-'+((i+1)*181));
 				return axis[i];
@@ -917,7 +920,7 @@ function refresh(data, selectData, opt){
 		var nostill = dim.group();
 
 		var dim2 = data.dimension(function(d){
-			if ((d.still == 1) && (d.date.getDay() == selectData-1)){
+			if ((d.still == 1) && (d.date.getUTCDate() == selectData)){
 				var i = Math.floor(d.age/181);
 				axis[i]=((181*i)+'-'+((i+1)*181));
 				return axis[i];
@@ -974,5 +977,9 @@ function reset(){
 	var demogra_data = demograph_data(originalNdx);
 	chart_demograph.load({
 		columns:demogra_data
-	})
+	});
+	var days_data = dayPie_data(originalNdx);
+	chart_day.load({
+		columns:day_data
+	});
 }
