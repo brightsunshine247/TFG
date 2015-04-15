@@ -19,18 +19,24 @@ var yearDim;
 var monthDim;
 var dayDim;
 var fullDateDim;
+
+var stillNoStillChart;
+var monthChart;
+var dayChart;
+var demographChart;
+var yearChart;
+var tzCharts;
+var companyChart;
+var dayOfWeekChart;
 $(document).ready(function(){
-    var stillNoStillChart = dc.pieChart('#still-nostill-chart');
-    var monthChart = dc.pieChart('#month-chart');
-    var dayChart = dc.barChart('#day-chart');
-    var demographChart = dc.rowChart('#demograph-chart');
-	var yearChart = dc.pieChart('#year-chart');
-    var tzCharts = dc.rowChart('#time-zone-chart');
-	var companyChart = dc.rowChart('#company-chart');
-//	var idChart = dc.lineChart('#forId');
-//	var stillChart = dc.lineChart('#forStill');
-//	var dateChart = dc.lineChart('#forDate');
-	var dayOfWeekChart = dc.pieChart('#day-Of-Week');
+    stillNoStillChart = dc.pieChart('#still-nostill-chart');
+    monthChart = dc.pieChart('#month-chart');
+    dayChart = dc.barChart('#day-chart');
+    demographChart = dc.rowChart('#demograph-chart');
+	yearChart = dc.pieChart('#year-chart');
+    tzCharts = dc.rowChart('#time-zone-chart');
+	companyChart = dc.rowChart('#company-chart');
+	dayOfWeekChart = dc.pieChart('#day-Of-Week');
 	table = dc.dataTable('.dc-data-table');
     $.when(
 		// Load agin json file
@@ -399,6 +405,10 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 					format: function (d) {
 						return '<input class="checkTZ" type="checkbox" id="'+d.TZ+'_'+d.id+'">';
 					}
+				},
+				{
+					label: '<button onclick="filterAnd()">Filter AND</button>',
+					format: function(){'';}
 				}
             ])
             .sortBy(function (d) {
@@ -553,6 +563,13 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 						andOrBox['tz'] = tzBox;
 					}
 				});
+			});
+			$(window).bind('scroll', function(){
+				if($(this).scrollTop() == ($('body').outerHeight() - $(window).innerHeight())) {
+				    var size = table.size();
+					table.size(size+5);
+					dc.redrawAll();
+				}
 			});
 		});
 /*********************************************************************************************************************************

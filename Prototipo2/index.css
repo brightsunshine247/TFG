@@ -12,3 +12,12 @@
 .dc-table-head img, a, #slider-range span{
 	cursor: pointer;
 }
+
+.container {
+	width: 90%;
+}
+
+.row {
+	margin-left: auto;
+	margin-right: auto;
+}
