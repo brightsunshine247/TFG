@@ -565,10 +565,12 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 				});
 			});
 			$(window).bind('scroll', function(){
-				if($(this).scrollTop() == ($('body').outerHeight() - $(window).innerHeight())) {
+				if($(this).scrollTop() == ($('body').outerHeight() - $(window).innerHeight()-1)) {
+					$('#load').show();
 				    var size = table.size();
 					table.size(size+5);
 					dc.redrawAll();
+					$('#load').hide();
 				}
 			});
 		});

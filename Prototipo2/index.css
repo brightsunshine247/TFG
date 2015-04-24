@@ -8,6 +8,11 @@
 	background-color: #D9EDF7;
 	box-shadow: 0px 0px 20px #5A5B63;
 }
+#load{
+	position: fixed;
+	top: 40%;
+	left: 40%;
+}
 
 .dc-table-head img, a, #slider-range span{
 	cursor: pointer;
