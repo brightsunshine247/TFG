@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>QZ DashBoard DC</title>
+
+    <meta charset="UTF-8">
+	<!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/jquery-ui.custom.min.css">
+    <link rel="stylesheet" type="text/css" href="../css/dc.css"/>
+	<link rel="stylesheet" type="text/css" href="index.css"/>
+	<!-- JavaScrip -->
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+	<script type="text/javascript" src="../js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../js/d3.js"></script>
+    <script type="text/javascript" src="../js/crossfilter.js"></script>
+    <script type="text/javascript" src="../js/dc.js"></script>
+    <script type="text/javascript" src="../js/colorbrewer.js"></script>
+
+    <script type="text/javascript" src="index.js"></script>
+</head>
+    <body>
+        <div class="container">
+			<div class="row">
+				<div id="year-chart">
+                    <strong>Year</strong>
+					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:yearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+				
+                <div id="month-chart">
+                    <strong>Month</strong>
+					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:monthChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+		
+				<div id="day-Of-Week">
+                    <strong>Days Of the Week</strong>
+					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:dayOfWeekChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+			</div>
+
+			
+			<div class="row">
+                <div id="demograph-chart">
+                    <strong>Demograph</strong>
+					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:demographChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+
+            </div>
+
+            <div class="row">
+				<hr>
+				<label for="from" style="float: left;"><strong>Date range:</strong> from</label>
+				<input type="text" id="from" name="from" value=" " style="float: left; width:75px; height:15px;">
+				<label for="to" style="float: left;"> to</label>
+				<input type="text" id="to" name="to" value=" " style="width:75px; height:15px;">
+				<br>
+				<div id="slider-range" style="z-index:1;"></div><br>
+                <div class="dc-data-count">
+                    <span class="filter-count"></span> selected out of <span class="total-count"></span> records | <a 
+                        href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
+                </div>
+				<div align="right">Search by Name: <input type="text" id="table-search" value=""></input></div>
+				The table shows only first 20 records if you not select any filter
+	            <table class="table table-hover dc-data-table"></table>
+            </div>
+        </div>
+    </body>
+</html>

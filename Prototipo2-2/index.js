@@ -34,6 +34,7 @@ $(document).ready(function(){
 			}
 		});
 
+		
 /*********************************************************************************************************************************
 ******************************************************* Total -> Demograph *******************************************************
 *********************************************************************************************************************************/
@@ -109,10 +110,39 @@ $(document).ready(function(){
 				return -d.key.split('-')[0];
 			})
 			.title(function(d) { return d.key+' -> '+d.value})
-//	var retainedDim = dc.filters.TwoDimensionalFilter(demoGrp.top(Infinity), retained.group());
-console.log(demoGrp.top(Infinity))
-console.log(retainedDim.group().top(Infinity))
-console.log(nRetainedDim.group().top(Infinity))
+
+
+		dc.dataCount('.dc-data-count')
+            .dimension(ndx)
+            .group(all)
+            .html({
+                some:'<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
+                    ' | <a onclick="resetAll()">Reset All</a>',
+                all:'All records selected. Please click on the graph to apply filters.'	
+            });
+/*********************************************************************************************************************************
+**************************************************************** Table ***********************************************************
+*********************************************************************************************************************************/
+		var nameDim = ndx.dimension(function (d) {
+            return d.name;
+        });
+        table
+            .dimension(demoDim)
+            .group(function (d) {return d.start.getFullYear();})
+            .size(20)
+            .columns([
+                'id',
+				'name',
+				'start',
+				'end'
+			])
+			.sortBy(function (d) {
+                return d.start;
+            })
+            .order(d3.ascending);
+		table.on('renderlet', function(table) {
+			table.selectAll('.dc-table-group').classed('info', true);
+		 });
 /*********************************************************************************************************************************
 ************************************************************** SLider ************************************************************
 *********************************************************************************************************************************/
@@ -157,6 +187,8 @@ console.log(nRetainedDim.group().top(Infinity))
 						var i = Math.floor(age/181);
 						axis[i]=((181*i)+'-'+((i+1)*181));
 						return axis[i];
+					} else {
+						return 'Out Range'
 					}
 				});
 				grp = dim.group();
@@ -167,10 +199,14 @@ console.log(nRetainedDim.group().top(Infinity))
 						return -d.key.split('-')[0];
 					})
 					.title(function(d) { return d.key+' -> '+d.value})
+
+				table
+		            .dimension(dim)
+		            .group(function (d) {return d.start.getFullYear();})
 			} else if (type == 'retained'){
 				
 				dim = ndx.dimension(function(d){
-					if (d.end.getFullYear() == 2014){
+					if (d.end.getFullYear() == to){
 						if ((d.end.getFullYear() >= from) && (d.start.getFullYear() <= to)){
 							if (d.start.getFullYear() >= from){
 								start = new Date(d.start.getFullYear(), d.start.getMonth(), d.start.getUTCDate());
@@ -188,6 +224,8 @@ console.log(nRetainedDim.group().top(Infinity))
 							var i = Math.floor(age/181);
 							axis[i]=((181*i)+'-'+((i+1)*181));
 							return axis[i];
+						} else {
+							return 'Out Range';
 						}
 					
 					} else {
@@ -204,7 +242,7 @@ console.log(nRetainedDim.group().top(Infinity))
 					.title(function(d) { return d.key+' -> '+d.value})
 			} else {
 				dim = ndx.dimension(function(d){
-					if (d.end.getFullYear() != 2014){
+					if (d.end.getFullYear() != to){
 						if ((d.end.getFullYear() >= from) && (d.start.getFullYear() <= to)){
 							if (d.start.getFullYear() >= from){
 								start = new Date(d.start.getFullYear(), d.start.getMonth(), d.start.getUTCDate());
@@ -222,6 +260,8 @@ console.log(nRetainedDim.group().top(Infinity))
 							var i = Math.floor(age/181);
 							axis[i]=((181*i)+'-'+((i+1)*181));
 							return axis[i];
+						} else {
+							return 'Out Range';
 						}
 					
 					} else {
@@ -238,29 +278,7 @@ console.log(nRetainedDim.group().top(Infinity))
 					.title(function(d) { return d.key+' -> '+d.value})
 			}
 		}
-/*********************************************************************************************************************************
-**************************************************************** Table ***********************************************************
-*********************************************************************************************************************************/
-		var nameDim = ndx.dimension(function (d) {
-            return d.name;
-        });
-        table
-            .dimension(nameDim)
-            .group(function (d) {return d.start.getFullYear();})
-            .size(20)
-            .columns([
-                'id',
-				'name',
-				'start',
-				'end'
-			])
-			.sortBy(function (d) {
-                return d.start;
-            })
-            .order(d3.ascending);
-		table.on('renderlet', function(table) {
-			table.selectAll('.dc-table-group').classed('info', true);
-		 });
+
         dc.renderAll();
     });
 });

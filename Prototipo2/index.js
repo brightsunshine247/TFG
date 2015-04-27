@@ -56,7 +56,7 @@ $(document).ready(function(){
 		// Add date for each data
 		var dateFormat = d3.time.format('%Y-%m-%dT%H:%M:%S');
 		var format = dateFormat.parse(birth['date']);
-		var initDate = ((new Date(format.getFullYear(), format.getMonth(), format.getDay())-new Date(1970, 0, 0))/(1000*60*60*24));
+		var initDate = ((new Date(format.getFullYear(), format.getMonth(), format.getUTCDate())-new Date(1970, 0, 1))/(1000*60*60*24));
         data.forEach(function (d) {
 		    d.one = 1; // value 1 for each data
 			d.day = initDate-d.age;
@@ -122,19 +122,19 @@ $(document).ready(function(){
 *********************************************************************************************************************************/
         var dayOfWeekDim = ndx.dimension(function(d) {
 			var name;
-			if (d.date.getDay() == 0){
+			if (d.date.getDay() == 1){
 				name = 'Monday';
-			} else if (d.date.getDay() == 1){
-				name = 'Tuesday';
 			} else if (d.date.getDay() == 2){
-				name = 'Wednesday';
+				name = 'Tuesday';
 			} else if (d.date.getDay() == 3){
-				name = 'Thursday';
+				name = 'Wednesday';
 			} else if (d.date.getDay() == 4){
-				name = 'Friday';
+				name = 'Thursday';
 			} else if (d.date.getDay() == 5){
-				name = 'Saturday';
+				name = 'Friday';
 			} else if (d.date.getDay() == 6){
+				name = 'Saturday';
+			} else if (d.date.getDay() == 0){
 				name = 'Sunday';
 			}
             return name;
@@ -359,13 +359,7 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 					format: function (d) {
 						return '<a>'+d.name+'</a>';
 					}
-				},/*
-				{
-					label: '<button onclick="columnFilter('+"'name'"+')">Filter</button>',
-					format: function (d) {
-						return '<input class="checkName" type="checkbox" id="name'+d.id+'">';
-					}
-				},*/
+				},
 				{
 					label: '<a class="retained">Retained</a> <img src="arrow.png" height="10" width="10" onclick="sortB('+"'retained'"+')">',
 					format: function (d) {
