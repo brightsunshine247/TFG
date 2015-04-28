@@ -56,12 +56,14 @@ $(document).ready(function(){
 		// Add date for each data
 		var dateFormat = d3.time.format('%Y-%m-%dT%H:%M:%S');
 		var format = dateFormat.parse(birth['date']);
-		var initDate = ((new Date(format.getFullYear(), format.getMonth(), format.getUTCDate())-new Date(1970, 0, 1))/(1000*60*60*24));
+		var initDate = ((new Date(format.getFullYear(), format.getMonth(), format.getUTCDate())-new Date(1970, 0, 0))/(1000*60*60*24))+1;
         data.forEach(function (d) {
 		    d.one = 1; // value 1 for each data
 			d.day = initDate-d.age;
-		    d.date = dateFormat.parse(dateFormat(new Date(1970, 0, d.day)));
-			sliderDate.push(d.day);
+		    d.date = new Date(1970, 0, d.day);
+			if (sliderDate.indexOf(d.day) == -1){
+				sliderDate.push(d.day);
+			}
 		});
 /*********************************************************************************************************************************
 ************************************************* Pie -> retained VS No retained *************************************************
@@ -263,14 +265,15 @@ $(document).ready(function(){
 			numberOfMonths: 1,
 			onClose: function( selectedDate ) {
 				$( "#to" ).datepicker( "option", "minDate", selectedDate );
-				var ageFrom = ((new Date(parseInt(selectedDate.split('/')[2]), parseInt(selectedDate.split('/')[0]), parseInt(selectedDate.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24));
+				var ageFrom = ((new Date(parseInt(selectedDate.split('/')[2]), parseInt(selectedDate.split('/')[0])-1, parseInt(selectedDate.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24));
+alert(new Date(1970, 0, ageFrom))
 				if (to == undefined){
 					sliderDate[sliderDate.length-1]
 				}else{
-					var ageTo = ((new Date(parseInt(to.split('/')[2]), parseInt(to.split('/')[0]), parseInt(to.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24));
+					var ageTo = ((new Date(parseInt(to.split('/')[2]), parseInt(to.split('/')[0])-1, parseInt(to.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24));
 				}
 console.log($( "#slider-range" ).slider( "option", "min"))
-				$("#slider-range").slider("option", "values", [Math.floor(ageFrom), Math.floor(ageTo)]);
+				$("#slider-range").slider("option", "values", [ageFrom, ageTo]);
 				from = selectedDate;
 				if (to != undefined){
 					calendarFilter(from, to);
@@ -286,10 +289,10 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 				if (from == undefined){
 					sliderDate[0];
 				}else{
-					var ageFrom = ((new Date(parseInt(from.split('/')[2]), parseInt(from.split('/')[0]), parseInt(from.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24));
+					var ageFrom = ((new Date(parseInt(from.split('/')[2]), parseInt(from.split('/')[0])-1, parseInt(from.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24));
 				}
-				var ageTo = ((new Date(parseInt(selectedDate.split('/')[2]), parseInt(selectedDate.split('/')[0]), parseInt(selectedDate.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24));
-
+				var ageTo = ((new Date(parseInt(selectedDate.split('/')[2]), parseInt(selectedDate.split('/')[0])-1, parseInt(selectedDate.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24))+1;
+alert(new Date(1970, 0, ageTo))
 				$("#slider-range").slider("option", "values", [Math.floor(ageFrom), Math.floor(ageTo)]);
 				to = selectedDate;
 				if (from != undefined){
@@ -306,15 +309,15 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 			max: sliderDate[sliderDate.length-1],
 			values: [sliderDate[0], sliderDate[sliderDate.length-1]],
 			slide: function( event, ui ) {
-				var initDate = dateFormat.parse(dateFormat(new Date(1970, 0, ui.values[0])));
-				var finalDate = dateFormat.parse(dateFormat(new Date(1970, 0, ui.values[1])));
+				var initDate = new Date(1970, 0, ui.values[0]);
+				var finalDate = new Date(1970, 0, ui.values[1]);
 				var initMonth = initDate.getMonth()+1;
 				var finalMonth = finalDate.getMonth()+1;
 				var from = initMonth+'/'+initDate.getUTCDate()+'/'+initDate.getFullYear();
 				var to = finalMonth+'/'+finalDate.getUTCDate()+'/'+finalDate.getFullYear();
 				$('#from').val(from);
 				$('#to').val(to);
-				calendarFilter(from, to);
+				calendarFilter(initDate, finalDate);
 			}
 		});
 /*********************************************************************************************************************************
@@ -844,27 +847,43 @@ function tableFilter(type, data){
 *********************************************************************************************************************************/
 function calendarFilter(from, to){
 	fullDateDim.filter(function (d){
-		// FromYear < YEAR > ToYear
-		if ((d.getFullYear() > parseInt(from.split('/')[2])) && (d.getFullYear() < parseInt(to.split('/')[2]))){
+		// FromYear < YEAR < ToYear
+		if ((d.getFullYear() > from.getFullYear()) && (d.getFullYear() < to.getFullYear())){
 			return d;
-		// "YEAR = FromYear" and "MONTH >= fromMonth"
-		} else if ((d.getFullYear() == parseInt(from.split('/')[2])) &&
-					(d.getUTCDate() >= parseInt(from.split('/')[1]))){
-			return d;
-		// "YEAR = FromYear" and "MONTH = FromMonth" and "DAY >= FromDay"
-		} else if ((d.getFullYear() == parseInt(from.split('/')[2])) && 
-					(d.getMonth()+1 == parseInt(from.split('/')[0])) &&
-					(d.getUTCDate() >= parseInt(from.split('/')[1]))){
-			return d;
-		// "YEAR = ToYear" and "MONTH <= ToMonth"
-		} else if ((d.getFullYear() == parseInt(to.split('/')[2])) &&
-					(d.getMonth()+1 <= parseInt(to.split('/')[0]))){
-			return d;
-		// "YEAR = ToYear" and "MONTH = ToMonth" and "DAY <= ToDay"
-		} else if ((d.getFullYear() == parseInt(to.split('/')[2])) && 
-					(d.getMonth()+1 == parseInt(to.split('/')[0])) &&
-					(d.getUTCDate() <= parseInt(to.split('/')[1]))){
-			return d;
+		// FromYear = ToYear = YEAR
+		} else if ( (d.getFullYear() == from.getFullYear()) && (d.getFullYear() == to.getFullYear()) ){
+			// FromMonth < MONTH < ToMonth
+			if ( ( d.getMonth() > from.getMonth() ) && ( d.getMonth() < to.getMonth() ) ){
+				return d;
+			// FromMonth = ToMonth = MONTH
+			} else if ( (d.getMonth() == from.getMonth()) && (d.getMonth() == to.getMonth()) ){
+				// FromDay <= DAY <= ToDay
+				if ( (d.getUTCDate() >= from.getUTCDate()) && (d.getUTCDate() <= to.getUTCDate()) ){
+					return d;
+				}
+			} else if ( (d.getMonth() == from.getMonth()) && (d.getUTCDate() >= from.getUTCDate()) ) {
+				return d;
+			} else if ( (d.getMonth() == to.getMonth()) && (d.getUTCDate() <= to.getUTCDate()) ) {
+				return d;
+			}
+		// "YEAR = FromYear"
+		} else if ( d.getFullYear() == from.getFullYear() ) {
+			// Month > FromMonth
+			if (d.getMonth > from.getMonth){
+				return d;
+			// MONTH = FromMonth and Day >= FromDay
+			} else if ( (d.getMonth() == from.getMonth()) && (d.getUTCDate() >= from.getUTCDate()) ){
+				return d;
+			}
+		// "YEAR = ToYear"
+		} else if ( d.getFullYear() == to.getFullYear() ) {
+			// MONTH < ToMonth
+			if (d.getMonth() < to.getMonth()) {
+				return d;
+			// MONTH = ToMonth and DAY < ToDay
+			} else if ( (d.getMonth() == to.getMonth()) && (d.getUTCDate() <= to.getUTCDate())) {
+				return d;
+			}
 		}
 	});
 	dc.redrawAll();

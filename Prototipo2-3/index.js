@@ -28,8 +28,13 @@ $(document).ready(function(){
         data.forEach(function (d) {
 			d.one = 1;
 			d.date = dateFormat.parse(d.date);
+			var age = Math.floor((new Date(d.date.getFullYear(), d.date.getMonth(), d.date.getUTCDate())- new Date(1970, 0, 1))/(1000*60*60*24));
+			if (sliderDate.indexOf(age) == -1){sliderDate.push(age)}
 		});
 
+		fullDateDim = ndx.dimension(function(d) {
+			return d.date;
+		});
 /*********************************************************************************************************************************
 *********************************************************** Pie -> Year **********************************************************
 *********************************************************************************************************************************/
@@ -114,8 +119,51 @@ $(document).ready(function(){
 			})
 			.title(function(d) { return d.key+' -> '+d.value})
 
+/*********************************************************************************************************************************
+************************************************************** SLider ************************************************************
+*********************************************************************************************************************************/
+		sliderDate.sort(function(a, b){return a-b});
+		$( "#slider-range" ).slider({
+			range: true,
+			min: sliderDate[0],
+			max: sliderDate[sliderDate.length-1],
+			values: [sliderDate[0], sliderDate[sliderDate.length-1]],
+			slide: function( event, ui ) {
+				var from = new Date(1970, 0, ui.values[0]);
+				var to = new Date(1970, 0, ui.values[1]);
+				$('#from').val(from);
+				$('#to').val(to);
+				calendarFilter(from, to)
+			}
+		});
 
-
+function calendarFilter(from, to){
+	fullDateDim.filter(function (d){
+		// FromYear < YEAR > ToYear
+		if ((d.getFullYear() > from.getFullYear()) && (d.getFullYear() < to.getFullYear())){
+			return d;
+		// "YEAR = FromYear" and "MONTH >= fromMonth"
+		} else if ((d.getFullYear() == from.getFullYear()) &&
+					(d.getUTCDate() >= from.getUTCDate())){
+			return d;
+		// "YEAR = FromYear" and "MONTH = FromMonth" and "DAY >= FromDay"
+		} else if ((d.getFullYear() == from.getFullYear()) && 
+					(d.getMonth() == from.getMonth()) &&
+					(d.getUTCDate() >= from.getUTCDate())){
+			return d;
+		// "YEAR = ToYear" and "MONTH <= ToMonth"
+		} else if ((d.getFullYear() == to.getFullYear()) &&
+					(d.getMonth() <= to.getMonth())){
+			return d;
+		// "YEAR = ToYear" and "MONTH = ToMonth" and "DAY <= ToDay"
+		} else if ((d.getFullYear() == to.getFullYear()) && 
+					(d.getMonth() == to.getMonth()) &&
+					(d.getUTCDate() <= to.getUTCDate())){
+			return d;
+		}
+	});
+	dc.redrawAll();
+}
 		dc.dataCount('.dc-data-count')
             .dimension(ndx)
             .group(all)
