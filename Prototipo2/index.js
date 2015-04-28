@@ -238,11 +238,7 @@ $(document).ready(function(){
         dc.dataCount('.dc-data-count')
             .dimension(ndx)
             .group(all)
-            .html({
-                some:'<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
-                    ' | <a onclick="resetAll()">Reset All</a>',
-                all:'All records selected. Please click on the graph to apply filters.'	
-            });
+            .html('<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records | <a onclick="resetAll()">Reset All</a>');
 /*********************************************************************************************************************************
 ***************************************************** Necesaries Dimensions ******************************************************
 **********************************************************************************************************************************/
@@ -265,19 +261,18 @@ $(document).ready(function(){
 			numberOfMonths: 1,
 			onClose: function( selectedDate ) {
 				$( "#to" ).datepicker( "option", "minDate", selectedDate );
-				var ageFrom = ((new Date(parseInt(selectedDate.split('/')[2]), parseInt(selectedDate.split('/')[0])-1, parseInt(selectedDate.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24));
-alert(new Date(1970, 0, ageFrom))
+				from = new Date(parseInt(selectedDate.split('/')[2]), parseInt(selectedDate.split('/')[0])-1, parseInt(selectedDate.split('/')[1]));
+				var ageFrom = ((from - new Date(1970, 0, 0))/(1000*60*60*24));
 				if (to == undefined){
-					sliderDate[sliderDate.length-1]
+					sliderDate[sliderDate.length-1];
+					to = new Date(1970, 0, sliderDate[sliderDate.length-1]);
 				}else{
-					var ageTo = ((new Date(parseInt(to.split('/')[2]), parseInt(to.split('/')[0])-1, parseInt(to.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24));
+					//to = new Date(parseInt(to.split('/')[2]), parseInt(to.split('/')[0])-1, parseInt(to.split('/')[1]))
+					var ageTo = ((to - new Date(1970, 0, 0))/(1000*60*60*24));
 				}
-console.log($( "#slider-range" ).slider( "option", "min"))
 				$("#slider-range").slider("option", "values", [ageFrom, ageTo]);
-				from = selectedDate;
-				if (to != undefined){
-					calendarFilter(from, to);
-				}
+				//from = selectedDate;
+				calendarFilter(from, to);
 			}
 		});
 		$( "#to" ).datepicker({
@@ -288,16 +283,15 @@ console.log($( "#slider-range" ).slider( "option", "min"))
 				$( "#from" ).datepicker( "option", "maxDate", selectedDate );
 				if (from == undefined){
 					sliderDate[0];
+					from = new Date(1970, 0, sliderDate[0]);
 				}else{
-					var ageFrom = ((new Date(parseInt(from.split('/')[2]), parseInt(from.split('/')[0])-1, parseInt(from.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24));
+					var ageFrom = ((from - new Date(1970, 0, 0))/(1000*60*60*24));
 				}
-				var ageTo = ((new Date(parseInt(selectedDate.split('/')[2]), parseInt(selectedDate.split('/')[0])-1, parseInt(selectedDate.split('/')[1]))-new Date(1970, 0, 0))/(1000*60*60*24))+1;
-alert(new Date(1970, 0, ageTo))
+				to = new Date(parseInt(selectedDate.split('/')[2]), parseInt(selectedDate.split('/')[0])-1, parseInt(selectedDate.split('/')[1]));
+				var ageTo = ((to - new Date(1970, 0, 0))/(1000*60*60*24))+1;
 				$("#slider-range").slider("option", "values", [Math.floor(ageFrom), Math.floor(ageTo)]);
-				to = selectedDate;
-				if (from != undefined){
-					calendarFilter(from, to);
-				}
+				//to = selectedDate;
+				calendarFilter(from, to);
 			}
 		});
 /*********************************************************************************************************************************
@@ -565,8 +559,14 @@ alert(new Date(1970, 0, ageTo))
 				if($(this).scrollTop() == ($('body').outerHeight() - $(window).innerHeight()-1)) {
 					$('#load').show();
 				    var size = table.size();
-					table.size(size+5);
-					dc.redrawAll();
+					var total = $('.filter-count').html();
+					if (size >= total){
+						size = total;
+					}
+					if (size != parseInt(total)){
+						table.size(size+5);
+						dc.redrawAll();
+					}
 					$('#load').hide();
 				}
 			});
