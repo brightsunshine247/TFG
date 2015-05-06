@@ -238,7 +238,12 @@ $(document).ready(function(){
         dc.dataCount('.dc-data-count')
             .dimension(ndx)
             .group(all)
-            .html('<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records | <a onclick="resetAll()">Reset All</a>');
+			.html({
+            some:'<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
+                ' | <a onclick="resetAll()">Reset All</a>',
+            all:'<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
+                ' | <a onclick="resetAll()">Reset All</a>'
+        });
 /*********************************************************************************************************************************
 ***************************************************** Necesaries Dimensions ******************************************************
 **********************************************************************************************************************************/
@@ -557,17 +562,19 @@ $(document).ready(function(){
 			});
 			$(window).bind('scroll', function(){
 				if($(this).scrollTop() == ($('body').outerHeight() - $(window).innerHeight()-1)) {
-					$('#load').show();
+					//$('#load').show();
 				    var size = table.size();
-					var total = $('.filter-count').html();
-					if (size >= total){
-						size = total;
+					var numero = $('.dc-data-count.dc-chart').html().split('<strong>')[1].split('</strong>')[0];
+					var total = parseInt(numero);
+					if (numero.split(',')[1] != undefined){
+						total = parseInt(numero.split(',')[0]+numero.split(',')[1]);
 					}
-					if (size != parseInt(total)){
+console.log(size+' '+total)
+					if (size < total){
 						table.size(size+5);
 						dc.redrawAll();
 					}
-					$('#load').hide();
+					//$('#load').hide();
 				}
 			});
 		});
