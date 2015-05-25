@@ -561,20 +561,21 @@ $(document).ready(function(){
 				});
 			});
 			$(window).bind('scroll', function(){
+//console.log($(window).scrollTop()+' = '+($('body').outerHeight() - $(window).innerHeight()-1))
 				if($(this).scrollTop() == ($('body').outerHeight() - $(window).innerHeight()-1)) {
-					//$('#load').show();
+					$('#load').show();
 				    var size = table.size();
 					var numero = $('.dc-data-count.dc-chart').html().split('<strong>')[1].split('</strong>')[0];
 					var total = parseInt(numero);
 					if (numero.split(',')[1] != undefined){
 						total = parseInt(numero.split(',')[0]+numero.split(',')[1]);
 					}
-console.log(size+' '+total)
+//console.log(size+' '+total)
 					if (size < total){
 						table.size(size+5);
 						dc.redrawAll();
 					}
-					//$('#load').hide();
+					$('#load').hide();
 				}
 			});
 		});

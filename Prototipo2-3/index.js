@@ -9,6 +9,7 @@ $(document).ready(function(){
 	monthChart = dc.pieChart('#month-chart');
     dayOfWeekChart = dc.pieChart('#day-Of-Week');
 	yearChart = dc.pieChart('#year-chart');
+	companyChart = dc.barChart('#company-chart');
 	table = dc.dataTable('.dc-data-table');
     $.when(
 		// Load agin json file
@@ -119,6 +120,31 @@ $(document).ready(function(){
 			})
 			.title(function(d) { return d.key+' -> '+d.value})
 
+
+/*********************************************************************************************************************************
+************************************************************** Company ***********************************************************
+*********************************************************************************************************************************/
+		var compDim = ndx.dimension(function(d){
+			return d.company;
+		})
+		var compGrp = compDim.group();
+
+		companyChart
+			.width(1050).height(300)
+            .dimension(compDim)
+            .group(compGrp)
+//            .x(d3.scale.linear().domain([0,32]))
+			.x(d3.scale.ordinal().domain([""])) // Need empty val to offset first value
+			.xUnits(dc.units.ordinal)
+			.centerBar(true)
+			.elasticX(true)
+			.centerBar(true)
+			.elasticY(true)
+			.brushOn(true)
+			.renderHorizontalGridLines(true)
+			.margins({top: 0, right: 50, bottom: 20, left: 40});
+        companyChart.xAxis().tickFormat(function(d) {return d});
+        companyChart.yAxis().ticks(15);
 /*********************************************************************************************************************************
 ************************************************************** SLider ************************************************************
 *********************************************************************************************************************************/
@@ -196,8 +222,25 @@ function calendarFilter(from, to){
             .order(d3.ascending);
 		table.on('renderlet', function(table) {
 			table.selectAll('.dc-table-group').classed('info', true);
+
+
 		 });
 
+		$("#table-search").on('input',function(){
+			text_filter(nameDim, this.value);
+			function text_filter(dim, q){
+				table.filterAll();
+				var re = new RegExp(q,"i")
+				if (q != '') {
+					dim.filter(function(d) {
+						return 0 == d.search(q);
+					});
+				}else{
+					dim.filterAll();
+				}
+				dc.redrawAll();
+			}
+		});
         dc.renderAll();
     });
 });
