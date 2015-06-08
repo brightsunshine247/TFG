@@ -28,6 +28,7 @@ var yearChart;
 var tzCharts;
 var companyChart;
 var dayOfWeekChart;
+
 $(document).ready(function(){
     stillNoStillChart = dc.pieChart('#still-nostill-chart');
     monthChart = dc.pieChart('#month-chart');
@@ -48,6 +49,7 @@ $(document).ready(function(){
             birth = data;
         })
     ).done(function(){
+		$('#load').hide();
         datas = birAgin(birth['persons'], aging['persons']);
         data = dcFormat(datas);
         var ndx = crossfilter(data);

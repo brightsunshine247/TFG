@@ -44,6 +44,7 @@ $(document).ready(function(){
             scmCommit = d;
         })
     ).done(function(){
+		$('#load').hide();
         var data = dcFormat(scmCommit);
         var ndx = crossfilter(data);
 		var all = ndx.groupAll();
