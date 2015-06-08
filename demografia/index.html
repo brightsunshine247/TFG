@@ -30,7 +30,7 @@
 		                href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a> -->
 	        </div>
 			<div class="comment"><h4>Este es un dashboard de visualización y filtrado de datos, de manera que todos los filtros que se seleccione actuarán en todas las gráficas y en la tabla. Para probar solo tiene que ir seleccionando los campos. Para volver al estado inicial pulse en Show All</h4></div>
-			<div style="padding: 10px; color: #8B8FFD;">
+			<div style="padding: 10px;">
 				<div style="float:left; height:80px; margin-top: 10px;"><h5>Date range: </h5></div>
 				<div style="width:950px;height:80px; margin-left:100px">
 					<label for="from" style="float: left;">from &nbsp;&nbsp;</label>
@@ -105,13 +105,14 @@
 				</div>
 			</div>
 			<br>
+			<hr>
 			<br>
             <div class="row">
 				<div class="table">
 					The table shows only first 20 records if you not select any filter or scroll
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; 				
-					Search by Name: <input type="text" id="table-search" value=""></input>
-					<button onclick="filterAnd()">Filter AND</button>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; <button onclick="filterAnd()">Filter AND</button>				
+					<div align="right" style="float:right">Search by Name: <input type="text" id="table-search" value=""></input></div>
+					
 		            <table class="table table-hover dc-data-table"></table>
 				</div>
             </div>

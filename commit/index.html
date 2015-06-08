@@ -25,6 +25,23 @@
 			<div id="load" align="center">
 				<img src="../img/load.GIF">
 			</div>
+
+			<div class="dc-data-count">
+	<!--                    <span class="filter-count"></span> selected out of <span class="total-count"></span> records | <a 
+		                href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a> -->
+	        </div>
+			<div class="comment"><h4>Este es un dashboard de visualización y filtrado de datos, de manera que todos los filtros que se seleccione actuarán en todas las gráficas y en la tabla. Para probar solo tiene que ir seleccionando los campos. Para volver al estado inicial pulse en Show All</h4></div>
+			<div style="padding: 10px;">
+				<div style="float:left; height:80px; margin-top: 10px;"><h5>Date range: </h5></div>
+				<div style="width:950px;height:80px; margin-left:100px">
+					<label for="from" style="float: left;">from &nbsp;&nbsp;</label>
+					<input type="text" id="from" name="from" value=" " style="float: left; width:200px; height:15px;">
+					<label for="to" style="float: left;">&nbsp;&nbsp; to &nbsp;&nbsp;</label>
+					<input type="text" id="to" name="to" value=" " style="width:200px; height:15px;">
+					<br>
+					<div id="slider-range" style="z-index:1;"></div><br>
+				</div>
+			</div><br>
 			<div class="row">
 				<div id="year-chart">
                     <strong title="Commits by year">Year</strong>
@@ -128,18 +145,9 @@
 
             <div class="row">
 				<hr>
-				<label for="from" style="float: left;"><strong>Date range:</strong> from</label>
-				<input type="text" id="from" name="from" value=" " style="float: left; height:15px;">
-				<label for="to" style="float: left;"> to</label>
-				<input type="text" id="to" name="to" value=" " style="height:15px;">
-				<br>
-				<div id="slider-range" style="z-index:1;"></div><br>
-                <div class="dc-data-count">
-                    <span class="filter-count"></span> selected out of <span class="total-count"></span> records | <a 
-                        href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
-                </div>
-				<div align="right">Search by Name: <input type="text" id="table-search" value=""></input></div>
 				The table shows only first 20 records if you not select any filter
+				<div align="right" style="float:right">Search by Name: <input type="text" id="table-search" value=""></input></div>
+				
 	            <table class="table table-hover dc-data-table"></table>
             </div>
         </div>
