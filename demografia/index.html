@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Git Activity Demography</title>
+
+    <meta charset="UTF-8">
+	<!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="../css/jquery-ui.custom.min.css">
+    <link rel="stylesheet" type="text/css" href="../css/dc.css"/>
+	<link rel="stylesheet" type="text/css" href="index.css"/>
+	<!-- JavaScrip -->
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+	<script type="text/javascript" src="../js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../js/d3.js"></script>
+    <script type="text/javascript" src="../js/crossfilter.js"></script>
+    <script type="text/javascript" src="../js/dc.js"></script>
+    <script type="text/javascript" src="../js/colorbrewer.js"></script>
+
+    <script type="text/javascript" src="index.js"></script>
+</head>
+    <body>
+		
+        <div class="container">
+			<h1 align="center"> Git Activity Demography </h1><hr>
+			<div class="dc-data-count">
+	<!--                    <span class="filter-count"></span> selected out of <span class="total-count"></span> records | <a 
+		                href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a> -->
+	        </div>
+			<div class="comment"><h4>Este es un dashboard de visualización y filtrado de datos, de manera que todos los filtros que se seleccione actuarán en todas las gráficas y en la tabla. Para probar solo tiene que ir seleccionando los campos. Para volver al estado inicial pulse en Show All</h4></div>
+			<div style="padding: 10px; color: #8B8FFD;">
+				<div style="float:left; height:80px; margin-top: 10px;"><h5>Date range: </h5></div>
+				<div style="width:950px;height:80px; margin-left:100px">
+					<label for="from" style="float: left;">from &nbsp;&nbsp;</label>
+					<input type="text" id="from" name="from" value=" " style="float: left; width:75px; height:15px;">
+					<label for="to" style="float: left;">&nbsp;&nbsp; to &nbsp;&nbsp;</label>
+					<input type="text" id="to" name="to" value=" " style="width:75px; height:15px;">
+					<br>
+					<div id="slider-range" style="z-index:1;"></div><br>
+				</div>
+			</div>
+			<br>
+            <div class="row">
+                <div id="still-nostill-chart">
+                    <strong title="Developers retained or dropped out">Retention</strong>
+					<a class="reset" href="javascript:stillNoStillChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+
+				<div id="year-chart">
+                    <strong title="Developers by year of first activity">Year</strong>
+					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:yearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+				
+                <div id="month-chart">
+                    <strong title="Developers by month of first activity">Month</strong>
+					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:monthChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+		
+				<div id="day-Of-Week">
+                    <strong title="Developers by day of the week of first activity">Days Of the Week</strong>
+					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:dayOfWeekChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+			</div>
+			<br>
+			<div class="row">
+                <div id="demograph-chart">
+                    <strong title="Developers by 'ages', as tiem in days from first activity">Ages</strong>
+					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:demographChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+
+				<div id="day-chart">
+                    <strong title="Developers by day of first activity">Days</strong>
+                    <span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:dayChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+				
+                
+            </div>
+			<br>
+            <div class="row">
+                <div id="time-zone-chart">
+                    <strong title="Time zone of first activity">Time Zone</strong>
+                    <span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:tzCharts.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+
+				<div id="company-chart">
+					<strong title="Developers by company of first activity">Companies</strong>
+					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:companyChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+				</div>
+			</div>
+			<br>
+			<br>
+            <div class="row">
+				<div class="table">
+					The table shows only first 20 records if you not select any filter or scroll
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; 				
+					Search by Name: <input type="text" id="table-search" value=""></input>
+					<button onclick="filterAnd()">Filter AND</button>
+		            <table class="table table-hover dc-data-table"></table>
+				</div>
+            </div>
+        </div>
+		<div id="profile" style="display: none; z-index: 2;"></div>
+		<div id="show-date" style="display: none; z-index: 2;">
+			<strong>Date</strong><br>
+			Year: <a id="clickYear"></a><br>
+			Month: <a id="clickMonth"></a><br>
+			Day: <a id="clickDay"></a><br>
+			<button onclick="closeDate()">Close</button>
+		</div>
+		<div id="pop" style="display: none; z-index: 2;"></div>
+		<div id="load" style="display: none;">
+			<img src="load.GIF" height="90" width="90">
+		</div>
+    </body>
+</html>

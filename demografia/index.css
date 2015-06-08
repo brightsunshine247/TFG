@@ -1,0 +1,47 @@
+#profile, #show-date, #pop{
+	position: fixed;
+	top: 10%;
+	left: 50%;
+	border: solid;
+	border-radius: 10px;
+	padding: 5px;
+	background-color: #D9EDF7;
+	box-shadow: 0px 0px 20px #5A5B63;
+}
+#load{
+	position: fixed;
+	top: 40%;
+	left: 40%;
+}
+
+.dc-table-head img, a, #slider-range span{
+	cursor: pointer;
+}
+
+.container {
+	width: 90%;
+}
+
+.row {
+	margin-left: auto;
+	margin-right: auto;
+}
+.dc-data-count, .comment, .table1 {
+	border: solid;
+	border-radius: 10px;
+	padding: 5px;
+	background-color: silver;
+	box-shadow: 0px 0px 20px #5A5B63;
+}
+.dc-data-count {
+	z-index: 5;
+	position: fixed;
+}
+
+.comment {
+	margin-left: 50%;
+}
+
+#still-nostill-chart, #year-chart, #month-chart, #day-Of-Week {
+	margin-left: 6.3%;
+}
