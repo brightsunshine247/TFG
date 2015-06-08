@@ -26,12 +26,13 @@
 	margin-left: auto;
 	margin-right: auto;
 }
-.dc-data-count, .comment, .table1 {
+.dc-data-count, .comment, .row {
 	border: solid;
 	border-radius: 10px;
 	padding: 5px;
-	background-color: silver;
-	box-shadow: 0px 0px 20px #5A5B63;
+	background-color: #B5B8F7;
+	color: #02079F;
+	box-shadow: 0px 0px 50px #5A5B63;
 }
 .dc-data-count {
 	z-index: 5;
@@ -40,6 +41,17 @@
 
 .comment {
 	margin-left: 50%;
+}
+
+body {
+	background: url(background.jpg);
+}
+
+h1 {
+	color: #8B8FFD;
+}
+.ui-widget-header {
+	background: #B5B8F7;
 }
 
 #still-nostill-chart, #year-chart, #month-chart, #day-Of-Week {

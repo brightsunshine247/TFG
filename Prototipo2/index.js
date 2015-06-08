@@ -70,7 +70,7 @@ $(document).ready(function(){
 *********************************************************************************************************************************/
 		
         var sNsDim = ndx.dimension(function (d) {
-            return d.noretained > d.retained ?  'No': 'Yes';
+            return d.noretained > d.retained ?  'Dropped out': 'Retained';
         });
         var sNsGrp = sNsDim.group();
         stillNoStillChart
@@ -159,7 +159,7 @@ $(document).ready(function(){
         var dayGrp = dayDim.group();
 
         dayChart
-            .width(450).height(300)
+            .width(500).height(400)
             .dimension(dayDim)
             .group(dayGrp)
             .x(d3.scale.linear().domain([0,32]))
@@ -183,7 +183,7 @@ $(document).ready(function(){
 		})
 		var demoGrp = demoDim.group();
 		demographChart
-			.width(450).height(400)
+			.width(500).height(400)
 			.margins({top: 0, right: 50, bottom: 20, left: 40})
 			.elasticX(true)
 			.dimension(demoDim)
@@ -203,7 +203,7 @@ $(document).ready(function(){
         var tzGrp = tzDim.group().reduceSum(function(d) {
             return d.one;
         });
-        tzCharts.width(450).height(400)
+        tzCharts.width(500).height(400)
 			.margins({top: 0, right: 50, bottom: 20, left: 40})
 			.elasticX(true)
 			.dimension(tzDim)
@@ -224,7 +224,7 @@ $(document).ready(function(){
 			return d.one;
 		});
 		companyChart
-			.width(450).height(300)
+			.width(500).height(400)
 			.margins({top: 0, right: 50, bottom: 20, left: 40})
 			.elasticX(true)
 			.dimension(compDim)
@@ -239,10 +239,10 @@ $(document).ready(function(){
             .dimension(ndx)
             .group(all)
 			.html({
-            some:'<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
-                ' | <a onclick="resetAll()">Reset All</a>',
-            all:'<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
-                ' | <a onclick="resetAll()">Reset All</a>'
+            some:'<strong>%filter-count</strong> developer shows from a total for <strong>%total-count</strong> developers' +
+                ' | <a onclick="resetAll()">Show all</a>',
+            all:'<strong>%filter-count</strong> developer shows from a total for <strong>%total-count</strong> developers' +
+                ' | <a onclick="resetAll()">Show all</a>'
         });
 /*********************************************************************************************************************************
 ***************************************************** Necesaries Dimensions ******************************************************
@@ -401,10 +401,6 @@ $(document).ready(function(){
 					format: function (d) {
 						return '<input class="checkTZ" type="checkbox" id="'+d.TZ+'_'+d.id+'">';
 					}
-				},
-				{
-					label: '<button onclick="filterAnd()">Filter AND</button>',
-					format: function(){'';}
 				}
             ])
             .sortBy(function (d) {
@@ -561,9 +557,8 @@ $(document).ready(function(){
 				});
 			});
 			$(window).bind('scroll', function(){
-//console.log($(window).scrollTop()+' = '+($('body').outerHeight() - $(window).innerHeight()-1))
-				if($(this).scrollTop() == ($('body').outerHeight() - $(window).innerHeight()-1)) {
-					$('#load').show();
+//console.log($(window).scrollTop()+' = '+($('body').outerHeight() - $(window).innerHeight()))
+				if($(this).scrollTop() == ($('body').outerHeight() - $(window).innerHeight())) {
 				    var size = table.size();
 					var numero = $('.dc-data-count.dc-chart').html().split('<strong>')[1].split('</strong>')[0];
 					var total = parseInt(numero);
@@ -575,7 +570,6 @@ $(document).ready(function(){
 						table.size(size+5);
 						dc.redrawAll();
 					}
-					$('#load').hide();
 				}
 			});
 		});

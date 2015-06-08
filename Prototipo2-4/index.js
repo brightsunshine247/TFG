@@ -1,20 +1,33 @@
 var table;
-//var demographChart;
 var yearChart;
 var monthChart;
 var dayOfWeekChart;
 var companyChart;
+var repoChart;
+var tzChart;
+var commitChart;
+var compTimeChart;
+var repoTimeChart;
 var scmCompany;
 var scmRepo;
 var scmCommit;
 
 $(document).ready(function(){
-//    demographChart = dc.rowChart('#demograph-chart');
 	monthChart = dc.pieChart('#month-chart');
     dayOfWeekChart = dc.pieChart('#day-Of-Week');
 	yearChart = dc.pieChart('#year-chart');
-	companyChart = dc.lineChart('#company-chart');
+	companyChart = dc.barChart('#company-chart');
 	var compSliderChart = dc.barChart('#comp-slider-chart');
+	repoChart = dc.barChart('#repo-chart');
+	var repoSliderChart = dc.barChart('#repo-slider-chart');
+	tzChart = dc.barChart('#tz-chart');
+	var tzSliderChart = dc.barChart('#tz-slider-chart');
+	commitChart = dc.lineChart('#commit-chart');
+	var commitSliderChart = dc.barChart('#commit-slider-chart');
+	compTimeChart = dc.lineChart('#comp-time-chart');
+	var compTimeSliderChart = dc.barChart('#comp-time-slider-chart');
+	repoTimeChart = dc.lineChart('#repo-time-chart');
+	var repoTimeSliderChart = dc.barChart('#repo-time-slider-chart');
 	table = dc.dataTable('.dc-data-table');
     $.when(
 		// Load agin json file
@@ -39,11 +52,10 @@ $(document).ready(function(){
 		// Add date for each data
 		var dateFormat = d3.time.format('%Y-%m-%dT%H:%M:%S');
         data.forEach(function (d) {
-			d.one = 1;
-			d.date = dateFormat.parse(d.date);
-//			var age = Math.floor((new Date(d.date.getFullYear(), d.date.getMonth(), d.date.getUTCDate())- new Date(1970, 0, 1))/(1000*60*60*24));
-//			if (sliderDate.indexOf(age) == -1){sliderDate.push(age)}
+			d.dd = dateFormat.parse(d.date);
+			d.month = d3.time.month(d.dd); 
 		});
+//console.log(data)
 /*		fullDateDim = ndx.dimension(function(d) {
 			return d.date;
 		});*/
@@ -51,11 +63,10 @@ $(document).ready(function(){
 *********************************************************** Pie -> Year **********************************************************
 *********************************************************************************************************************************/
 		yearDim = ndx.dimension(function(d) {
-            return d.date.getFullYear();
+            return d.dd.getFullYear();
         });
-        var yearGrp = yearDim.group().reduceSum(function(d) {
-            return d.one;
-        });
+        var yearGrp = yearDim.group();
+
         yearChart.width(180)
             .height(180)
             .radius(80)
@@ -66,11 +77,10 @@ $(document).ready(function(){
 ****************************************************** Pie (Donuts) -> Month *****************************************************
 *********************************************************************************************************************************/
         monthDim = ndx.dimension(function(d) {
-            return d.date.getMonth()+1;
+            return d.dd.getMonth()+1;
         });
-        var monthGrp = monthDim.group().reduceSum(function(d) {
-            return d.one;
-        });
+        var monthGrp = monthDim.group();
+
         monthChart.width(180)
             .height(180)
             .radius(80)
@@ -82,26 +92,26 @@ $(document).ready(function(){
 *********************************************************************************************************************************/
         var dayOfWeekDim = ndx.dimension(function(d) {
 			var name;
-			if (d.date.getDay() == 1){
+			if (d.dd.getDay() == 1){
 				name = 'Monday';
-			} else if (d.date.getDay() == 2){
+			} else if (d.dd.getDay() == 2){
 				name = 'Tuesday';
-			} else if (d.date.getDay() == 3){
+			} else if (d.dd.getDay() == 3){
 				name = 'Wednesday';
-			} else if (d.date.getDay() == 4){
+			} else if (d.dd.getDay() == 4){
 				name = 'Thursday';
-			} else if (d.date.getDay() == 5){
+			} else if (d.dd.getDay() == 5){
 				name = 'Friday';
-			} else if (d.date.getDay() == 6){
+			} else if (d.dd.getDay() == 6){
 				name = 'Saturday';
-			} else if (d.date.getDay() == 0){
+			} else if (d.dd.getDay() == 0){
 				name = 'Sunday';
 			}
             return name;
         });
-        var dayOfWeekGrp = dayOfWeekDim.group().reduceSum(function(d) {
-            return d.one;
-        });
+
+        var dayOfWeekGrp = dayOfWeekDim.group();
+
         dayOfWeekChart.width(180)
             .height(180)
             .radius(80)
@@ -109,91 +119,308 @@ $(document).ready(function(){
             .dimension(dayOfWeekDim)
             .group(dayOfWeekGrp);
 /*********************************************************************************************************************************
-******************************************************* Total -> Demograph *******************************************************
-*********************************************************************************************************************************/
-
-
-		
-/*********************************************************************************************************************************
 ************************************************************** Company ***********************************************************
 *********************************************************************************************************************************/
 		var compDim = ndx.dimension(function(d){
-			return d.company;
+			return d.org_id;
 		})
 
 		var compGrp = compDim.group();
-		compSliderChart
-			.width(990).height(40)
-            .dimension(compDim)
-            .group(compGrp)
-			.gap(1)
-//            .x(d3.scale.linear().domain([0,32]))
-			.x(d3.scale.ordinal().domain([""])) // Need empty val to offset first value
-			.xUnits(dc.units.ordinal)
-			.centerBar(true)
-			.elasticX(true)
-			.centerBar(true)
-			.elasticY(true)
-			.renderHorizontalGridLines(true)
-			.alwaysUseRounding(true)
-			.margins({top: 0, right: 50, bottom: 20, left: 40});
-        compSliderChart.xAxis().tickFormat(function(d) {return ''});
-		compSliderChart.yAxis().tickFormat(function(d) {return ''});
-//        companyChart.yAxis().ticks(15);
 
+		var domain = [];
+
+		compGrp.top(Infinity).forEach(function(d) {
+			domain[domain.length] = d.key;
+		});
+
+		var repoDim = ndx.dimension(function(d){
+			return d.repo_id;
+		})
+
+		var repoGrp = repoDim.group();
+
+		var domainRepo = [];
+
+		repoGrp.top(Infinity).forEach(function(d) {
+			domainRepo[domainRepo.length] = d.key;
+		});
+
+		data.forEach(function (d) {
+			d.order_company = domain.indexOf(d.org_id);
+			d.order_repo = domainRepo.indexOf(d.repo_id)
+		});
+
+		var companyDim = ndx.dimension(function(d){
+			return d.order_company;
+		});
+		var companyGrp = companyDim.group();
+/*
+.x(d3.scale.ordinal())
+		    .xUnits(dc.units.ordinal)
+*/
 		companyChart
-		    .renderArea(true)
 		    .width(990)
-		    .height(200)
+		    .height(300)
 		    .transitionDuration(1000)
-		    .margins({top: 30, right: 50, bottom: 25, left: 40})
-		    .dimension(compDim)
-		    .mouseZoomable(true)
-		    // Specify a range chart to link the brush extent of the range with the zoom focue of the current chart.
+		    .margins({top: 30, right: 50, bottom: 25, left: 50})
+		    .dimension(companyDim)
 		    .rangeChart(compSliderChart)
-		    .x(d3.scale.ordinal().domain([""])) // Need empty val to offset first value
-			.xUnits(dc.units.ordinal)
-//			.x(d3.scale.ordinal().domain([""])) // Need empty val to offset first value
-//			.xUnits(dc.units.ordinal)
-//		    .elasticY(true)
+		    //.x(d3.scale.ordinal().domain(domain))
+    		//.xUnits(dc.units.ordinal)
+			.x(d3.scale.linear().domain([-1,382]))
+			.elasticY(true)
+			.centerBar(true)
 		    .renderHorizontalGridLines(true)
 		    .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
 		    .brushOn(false)
-		    // Add the base layer of the stack with group. The second parameter specifies a series name for use in the
-		    // legend
-		    // The `.valueAccessor` will be used for the base layer
-		    .group(compGrp, 'Monthly Index Average');
-//		    .valueAccessor(function (d) {
-//		        return d.value.avg;
-//		    })
-		    // stack additional layers with `.stack`. The first paramenter is a new group.
-		    // The second parameter is the series name. The third is a value accessor.
-//		    .stack(monthlyMoveGroup, 'Monthly Index Move', function (d) {
-//		        return d.value;
-//		    })
-		    // title can be called by any stack layer.
-//		    .title(function (d) {
-//		        var value = d.value.avg ? d.value.avg : d.value;
-//		        if (isNaN(value)) {
-//		            value = 0;
-//		        }
-//		        return dateFormat(d.key) + '\n' + numberFormat(value);
-//		    });
+		    .group(companyGrp, 'Companies')
+			.ordering(function(d) { return -d.value })
+		    .title(function (d) {
+				var comp;
+				if (domain[d.key] == 261){
+					comp = 'No Company';
+				} else if (domain[d.key] > 261){
+					comp = scmCompany['values'][domain[d.key]-2][1];
+				} else {
+					comp = scmCompany['values'][domain[d.key]-1][1];
+				}
+				return comp + ': ' + d.value;
+		    });
+			
 
-/*		compSliderChart
-			.width(990)
-		    .height(40)
-		    .margins({top: 0, right: 50, bottom: 20, left: 40})
-		    .dimension(compDim)
-			.group(compGrp)
-		    .centerBar(true)
-		    .gap(1)
-		    .x(d3.time.scale().domain([new Date(2009, 0, 1), new Date(2015, 11, 31)]))
-		    .round(d3.time.month.round)
-		    .alwaysUseRounding(true)
-		    .xUnits(d3.time.months);
-//			.x(d3.scale.ordinal().domain([""])) // Need empty val to offset first value
-//			.xUnits(dc.units.ordinal);
+		compSliderChart
+			.width(990).height(40)
+			.margins({top: 0, right: 50, bottom: 20, left: 50})
+            .dimension(companyDim)
+            .group(companyGrp)
+			.centerBar(true)
+			.gap(1)
+			//.x(d3.scale.ordinal().domain(domain))
+    		//.xUnits(dc.units.ordinal)
+			.x(d3.scale.linear().domain([-1,382]))
+			.brushOn(true)
+			.alwaysUseRounding(true);
+		compSliderChart.yAxis().tickFormat(function(d) {return ''});
+
+
+/*********************************************************************************************************************************
+************************************************************** Repo ***********************************************************
+*********************************************************************************************************************************/
+		var repoOrderDim = ndx.dimension(function(d){
+			return d.order_repo;
+		});
+		var repoOrderGrp = repoOrderDim.group();
+
+
+		repoChart
+		    .width(990)
+		    .height(300)
+		    .transitionDuration(1000)
+		    .margins({top: 30, right: 50, bottom: 25, left: 50})
+		    .dimension(repoOrderDim)
+		    .rangeChart(repoSliderChart)
+		    .x(d3.scale.linear().domain([-1,182]))
+			.elasticY(true)
+			.centerBar(true)
+		    .renderHorizontalGridLines(true)
+		    .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
+		    .brushOn(true)
+		    .group(repoOrderGrp, 'Repo')
+			.title(function (d) {
+				return scmRepo['values'][domainRepo[d.key]-1][1] + ': ' + d.value;
+		    });
+
+		repoSliderChart
+			.width(990).height(40)
+			.margins({top: 0, right: 50, bottom: 20, left: 50})
+            .dimension(repoOrderDim)
+            .group(repoOrderGrp)
+			.centerBar(true)
+			.gap(1)
+			.x(d3.scale.linear().domain([-1,182]))
+			.brushOn(true)
+			.alwaysUseRounding(true);
+			
+		repoSliderChart.yAxis().tickFormat(function(d) {return ''});
+
+/*********************************************************************************************************************************
+************************************************************ Time Zone ***********************************************************
+*********************************************************************************************************************************/
+		var tzDim = ndx.dimension(function(d){
+			return d.tz;
+		})
+
+		var tzGrp = tzDim.group();
+		
+
+		tzChart
+		    .width(990)
+		    .height(300)
+		    .transitionDuration(1000)
+		    .margins({top: 30, right: 50, bottom: 25, left: 50})
+		    .dimension(tzDim)
+		    .rangeChart(tzSliderChart)
+		    .x(d3.scale.linear().domain([-13,13]))
+			.elasticY(true)
+			.centerBar(true)
+		    .renderHorizontalGridLines(true)
+		    .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
+		    .brushOn(false)
+		    .group(tzGrp, 'Time Zone');
+
+		tzSliderChart
+			.width(990).height(40)
+			.margins({top: 0, right: 50, bottom: 20, left: 50})
+            .dimension(tzDim)
+            .group(tzGrp)
+			.centerBar(true)
+			.gap(1)
+			.x(d3.scale.linear().domain([-13,13]))
+			.brushOn(true)
+			.alwaysUseRounding(true);
+			
+		tzSliderChart.yAxis().tickFormat(function(d) {return ''});
+
+/*********************************************************************************************************************************
+************************************************************ Commit ***********************************************************
+*********************************************************************************************************************************/
+		var compDic = {};
+		var repoDic = {};
+		var monthDim = ndx.dimension(function(d){
+			compDic[d.month] = [];
+			repoDic[d.month] = [];
+			return d.month;
+		});
+
+		var commitGrp = monthDim.group();
+		
+
+		commitChart
+		    .renderArea(true)
+		    .width(990)
+		    .height(300)
+		    .transitionDuration(1000)
+		    .margins({top: 30, right: 50, bottom: 25, left: 50})
+		    .dimension(monthDim)
+		    .rangeChart(commitSliderChart)
+		    .x(d3.time.scale().domain([new Date(2010, 0, 1), new Date(2015, 11, 31)]))
+        	.round(d3.time.month.round)
+        	.xUnits(d3.time.months)
+			.elasticY(true)
+		    .renderHorizontalGridLines(true)
+		    .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
+		    .brushOn(true)
+		    .group(commitGrp, 'Commit');
+
+		commitSliderChart
+			.width(990).height(40)
+			.margins({top: 0, right: 50, bottom: 20, left: 50})
+            .dimension(monthDim)
+            .group(commitGrp)
+			.centerBar(true)
+			.gap(1)
+			.x(d3.time.scale().domain([new Date(2010, 0, 1), new Date(2015, 11, 31)]))
+        	.round(d3.time.month.round)
+        	.xUnits(d3.time.months)
+			.brushOn(true)
+			.alwaysUseRounding(true);
+		commitSliderChart.yAxis().tickFormat(function(d) {return ''});
+
+/*********************************************************************************************************************************
+******************************************************** Company by Date *********************************************************
+*********************************************************************************************************************************/
+
+		var compTGrp = monthDim.group().reduceSum(function(d){
+			if (compDic[d.month].indexOf(d.org_id) == -1){
+				compDic[d.month].push(d.org_id);
+				return 1;
+			} else {
+				return 0;
+			}
+		});
+
+		var repoTGrp = monthDim.group().reduceSum(function(d){
+			if (repoDic[d.month].indexOf(d.repo_id) == -1){
+				repoDic[d.month].push(d.repo_id);
+				return 1;
+			} else {
+				return 0;
+			}
+		});
+
+		compTimeChart
+		    .renderArea(true)
+		    .width(450)
+		    .height(300)
+		    .transitionDuration(1000)
+		    .margins({top: 30, right: 50, bottom: 25, left: 50})
+		    .dimension(monthDim)
+		    .rangeChart(compTimeSliderChart)
+		    .x(d3.time.scale().domain([new Date(2010, 0, 1), new Date(2015, 11, 31)]))
+        	.round(d3.time.month.round)
+        	.xUnits(d3.time.months)
+			.elasticY(true)
+		    .renderHorizontalGridLines(true)
+		    .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
+		    .brushOn(true)
+		    .group(compTGrp, 'Company')
+
+		compTimeSliderChart
+			.width(450).height(40)
+			.margins({top: 0, right: 50, bottom: 20, left: 50})
+            .dimension(monthDim)
+            .group(compTGrp)
+			.centerBar(true)
+			.gap(1)
+			.x(d3.time.scale().domain([new Date(2010, 0, 1), new Date(2015, 11, 31)]))
+        	.round(d3.time.month.round)
+        	.xUnits(d3.time.months)
+			.brushOn(true)
+			.alwaysUseRounding(true);
+		compTimeSliderChart.yAxis().tickFormat(function(d) {return ''});
+
+/*********************************************************************************************************************************
+******************************************************** Repo by Date *********************************************************
+*********************************************************************************************************************************/
+		var repoTGrp = monthDim.group().reduceSum(function(d){
+			if (repoDic[d.month].indexOf(d.repo_id) == -1){
+				repoDic[d.month].push(d.repo_id);
+				return 1;
+			} else {
+				return 0;
+			}
+		});
+
+		repoTimeChart
+		    .renderArea(true)
+		    .width(450)
+		    .height(300)
+		    .transitionDuration(1000)
+		    .margins({top: 30, right: 50, bottom: 25, left: 50})
+		    .dimension(monthDim)
+		    .rangeChart(repoTimeSliderChart)
+		    .x(d3.time.scale().domain([new Date(2010, 0, 1), new Date(2015, 11, 31)]))
+        	.round(d3.time.month.round)
+        	.xUnits(d3.time.months)
+			.elasticY(true)
+		    .renderHorizontalGridLines(true)
+		    .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
+		    .brushOn(false)
+		    .group(repoTGrp, 'Repository by Date');
+
+		repoTimeSliderChart
+			.width(450).height(40)
+			.margins({top: 0, right: 50, bottom: 20, left: 50})
+            .dimension(monthDim)
+            .group(repoTGrp)
+			.centerBar(true)
+			.gap(1)
+			.x(d3.time.scale().domain([new Date(2010, 0, 1), new Date(2015, 11, 31)]))
+        	.round(d3.time.month.round)
+        	.xUnits(d3.time.months)
+			.brushOn(true)
+			.alwaysUseRounding(true);
+		repoTimeSliderChart.yAxis().tickFormat(function(d) {return ''});
 /*********************************************************************************************************************************
 ************************************************************** SLider ************************************************************
 *********************************************************************************************************************************/
@@ -255,12 +482,17 @@ function calendarFilter(from, to){
         });
         table
             .dimension(nameDim)
-            .group(function (d) {return d.date.getFullYear();})
+            .group(function (d) {return d.dd.getFullYear();})
             .size(20)
             .columns([
                 'id',
-				'date',
-				'person_id',
+				{
+					label: 'Date',
+					format: function (d) {
+						var formato = d3.format('02d');
+						return d.date;
+					} 
+				},
 				'name',
 				{
 					label: 'Company',
@@ -275,7 +507,6 @@ function calendarFilter(from, to){
 					} 
 				},
 				'tz',
-				'tz_orig'
 			])
 			.sortBy(function (d) {
                 return d.start;

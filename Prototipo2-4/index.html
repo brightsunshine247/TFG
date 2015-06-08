@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>QZ DashBoard DC</title>
+    <title>Git Activity Commits</title>
 
     <meta charset="UTF-8">
 	<!-- CSS -->
@@ -21,41 +21,33 @@
 </head>
     <body>
         <div class="container">
+			<h1 align="center"> Git Activity Commits </h1><hr>
 			<div class="row">
 				<div id="year-chart">
-                    <strong>Year</strong>
+                    <strong title="Commits by year">Year</strong>
 					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
 					<a class="reset" href="javascript:yearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
                     <div class="clearfix"></div>
                 </div>
 				
                 <div id="month-chart">
-                    <strong>Month</strong>
+                    <strong title="Commits by month">Month</strong>
 					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
 					<a class="reset" href="javascript:monthChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
                     <div class="clearfix"></div>
                 </div>
 		
 				<div id="day-Of-Week">
-                    <strong>Days Of the Week</strong>
+                    <strong title="Commits by days of the week">Days Of the Week</strong>
 					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
 					<a class="reset" href="javascript:dayOfWeekChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
                     <div class="clearfix"></div>
                 </div>
 			</div>
 
-			
-			<div class="row">
-                <div id="demograph-chart">
-                    <strong>Demograph</strong>
-					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
-					<a class="reset" href="javascript:demographChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-                    <div class="clearfix"></div>
-                </div>
-			</div>
 			<div class="row">
 				<div id="company-chart">
-                    <strong>Companies</strong>
+                    <strong title="Commits by companies">Companies</strong>
 					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
 					<a class="reset" href="javascript:companyChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
                     <div class="clearfix"></div>
@@ -66,6 +58,71 @@
 			    </div>
 			    <p class="muted pull-right" style="margin-right: 15px;">select a time range to zoom in</p>
 			</div>
+		
+			<div class="row">
+				<div id="repo-chart">
+                    <strong title="Commits by repository">Repositories</strong>
+					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:repoChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+			<div class="row">
+			    <div id="repo-slider-chart">
+			    </div>
+			    <p class="muted pull-right" style="margin-right: 15px;">select a time range to zoom in</p>
+			</div>
+
+			<div class="row">
+				<div id="tz-chart">
+                    <strong title="Commits by time zone">Time Zone</strong>
+					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:tzChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+			<div class="row">
+			    <div id="tz-slider-chart">
+			    </div>
+			    <p class="muted pull-right" style="margin-right: 15px;">select a time range to zoom in</p>
+			</div>
+
+			<div class="row">
+				<div id="commit-chart">
+                    <strong title="All commits" >Commit</strong>
+					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:commitChart.filterAll();commitSliderChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+			<div class="row">
+			    <div id="commit-slider-chart">
+			    </div>
+			    <p class="muted pull-right" style="margin-right: 15px;">select a time range to zoom in</p>
+			</div>
+
+			<div class="row">
+				<div id="comp-time-chart">
+                    <strong>Company</strong>
+					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:compTimeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+				<div id="repo-time-chart">
+                    <strong>Repository</strong>
+					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
+					<a class="reset" href="javascript:repoTimeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+			<div class="row">
+			    <div id="comp-time-slider-chart">
+			    </div>
+
+				<div id="repo-time-slider-chart">
+			    </div>
+			</div>
+
             <div class="row">
 				<hr>
 				<label for="from" style="float: left;"><strong>Date range:</strong> from</label>
