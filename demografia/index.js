@@ -365,12 +365,12 @@ $(document).ready(function(){
 					}
 				},
 				{
-					label: '<a class="retained">Retained</a> <img src="arrow.png" height="10" width="10" onclick="sortB('+"'retained'"+')">',
+					label: '<a class="retained">Retention</a> <img src="arrow.png" height="10" width="10" onclick="sortB('+"'retained'"+')">',
 					format: function (d) {
 						if (d.retained == 1){
-							return '<a>YES</a>';
+							return '<a>Retained</a>';
 						}else{
-							return '<a>NO</a>';
+							return '<a>Dropped out</a>';
 						}
 					}
 				},

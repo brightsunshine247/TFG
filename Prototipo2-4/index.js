@@ -3,31 +3,39 @@ var yearChart;
 var monthChart;
 var dayOfWeekChart;
 var companyChart;
+var companySliderChart;
 var repoChart;
+var repoSliderChart;
 var tzChart;
+var tzSliderChart;
 var commitChart;
+var commitSliderChart;
 var compTimeChart;
+var compTimeSliderChart;
 var repoTimeChart;
+var repoTimeSliderChart;
 var scmCompany;
 var scmRepo;
 var scmCommit;
-
+var sliderDate = [];
+var dates = [];
+var fullDateDim;
 $(document).ready(function(){
 	monthChart = dc.pieChart('#month-chart');
     dayOfWeekChart = dc.pieChart('#day-Of-Week');
 	yearChart = dc.pieChart('#year-chart');
 	companyChart = dc.barChart('#company-chart');
-	var compSliderChart = dc.barChart('#comp-slider-chart');
+	compSliderChart = dc.barChart('#comp-slider-chart');
 	repoChart = dc.barChart('#repo-chart');
-	var repoSliderChart = dc.barChart('#repo-slider-chart');
+	repoSliderChart = dc.barChart('#repo-slider-chart');
 	tzChart = dc.barChart('#tz-chart');
-	var tzSliderChart = dc.barChart('#tz-slider-chart');
+	tzSliderChart = dc.barChart('#tz-slider-chart');
 	commitChart = dc.lineChart('#commit-chart');
-	var commitSliderChart = dc.barChart('#commit-slider-chart');
+	commitSliderChart = dc.barChart('#commit-slider-chart');
 	compTimeChart = dc.lineChart('#comp-time-chart');
-	var compTimeSliderChart = dc.barChart('#comp-time-slider-chart');
+	compTimeSliderChart = dc.barChart('#comp-time-slider-chart');
 	repoTimeChart = dc.lineChart('#repo-time-chart');
-	var repoTimeSliderChart = dc.barChart('#repo-time-slider-chart');
+	repoTimeSliderChart = dc.barChart('#repo-time-slider-chart');
 	table = dc.dataTable('.dc-data-table');
     $.when(
 		// Load agin json file
@@ -44,21 +52,22 @@ $(document).ready(function(){
             scmCommit = d;
         })
     ).done(function(){
+		$('#load').hide();
         var data = dcFormat(scmCommit);
         var ndx = crossfilter(data);
 		var all = ndx.groupAll();
-//		var sliderDate = [];
-//		var final = [];
 		// Add date for each data
 		var dateFormat = d3.time.format('%Y-%m-%dT%H:%M:%S');
         data.forEach(function (d) {
 			d.dd = dateFormat.parse(d.date);
-			d.month = d3.time.month(d.dd); 
+			d.month = d3.time.month(d.dd);
+			if (sliderDate.indexOf(d.dd) == -1){
+				sliderDate.push(d.dd);
+			}
 		});
-//console.log(data)
-/*		fullDateDim = ndx.dimension(function(d) {
-			return d.date;
-		});*/
+		fullDateDim = ndx.dimension(function(d) {
+			return d.dd;
+		});
 /*********************************************************************************************************************************
 *********************************************************** Pie -> Year **********************************************************
 *********************************************************************************************************************************/
@@ -172,7 +181,7 @@ $(document).ready(function(){
 			.centerBar(true)
 		    .renderHorizontalGridLines(true)
 		    .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
-		    .brushOn(false)
+		    .brushOn(true)
 		    .group(companyGrp, 'Companies')
 			.ordering(function(d) { return -d.value })
 		    .title(function (d) {
@@ -265,7 +274,7 @@ $(document).ready(function(){
 			.centerBar(true)
 		    .renderHorizontalGridLines(true)
 		    .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
-		    .brushOn(false)
+		    .brushOn(true)
 		    .group(tzGrp, 'Time Zone');
 
 		tzSliderChart
@@ -405,7 +414,7 @@ $(document).ready(function(){
 			.elasticY(true)
 		    .renderHorizontalGridLines(true)
 		    .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
-		    .brushOn(false)
+		    .brushOn(true)
 		    .group(repoTGrp, 'Repository by Date');
 
 		repoTimeSliderChart
@@ -421,58 +430,123 @@ $(document).ready(function(){
 			.brushOn(true)
 			.alwaysUseRounding(true);
 		repoTimeSliderChart.yAxis().tickFormat(function(d) {return ''});
+
+/*********************************************************************************************************************************
+************************************************************ Calendar ************************************************************
+**********************************************************************************************************************************/
+		sliderDate.sort(function(a, b){return a-b});
+		for (i=0; i<sliderDate.length; i++){
+			var year = sliderDate[i].getFullYear();
+			var month = sliderDate[i].getMonth()+1;
+			var day = sliderDate[i].getUTCDate();
+			if (dates.indexOf(year+'/'+month+'/'+day) == -1){
+				dates.push(year+'/'+month+'/'+day);
+			}
+		};
+		var from;
+		var to;
+		$( "#from" ).datepicker({
+			changeMonth: true,
+			changeYear: true,
+			numberOfMonths: 1,
+			onClose: function( selectedDate ) {
+				$( "#to" ).datepicker( "option", "minDate", selectedDate );
+				from = new Date(parseInt(selectedDate.split('/')[2]), parseInt(selectedDate.split('/')[0])-1, parseInt(selectedDate.split('/')[1]));
+				if (to == undefined){
+					to = new Date(parseInt(dates[dates.length-1].split('/')[0]), parseInt(dates[dates.length-1].split('/')[1]), parseInt(dates[dates.length-1].split('/')[2]));
+				}
+				var yearF = from.getFullYear();
+				var monthF = from.getMonth()+1;
+				var dayF = from.getUTCDate();
+				var yearT = to.getFullYear();
+				var monthT = to.getMonth()+1;
+				var dayT = to.getUTCDate();
+				var fromDate = yearF+'/'+monthF+'/'+dayF;
+				var toDate = yearT+'/'+monthT+'/'+dayT; 
+				$("#slider-range").slider("option", "values", [fromDate, toDate]);
+				calendarFilter(from, to);
+			}
+		});
+		$( "#to" ).datepicker({
+			changeMonth: true,
+			changeYear: true,
+			numberOfMonths: 1,
+			onClose: function( selectedDate ) {
+				$( "#from" ).datepicker( "option", "maxDate", selectedDate );
+				if (from == undefined){
+					from = new Date(parseInt(dates[0].split('/')[0]), parseInt(dates[0].split('/')[1]), parseInt(dates[0].split('/')[2]));
+				}
+				to = new Date(parseInt(selectedDate.split('/')[2]), parseInt(selectedDate.split('/')[0])-1, parseInt(selectedDate.split('/')[1]));
+				var yearF = from.getFullYear();
+				var monthF = from.getMonth()+1;
+				var dayF = from.getUTCDate();
+				var yearT = to.getFullYear();
+				var monthT = to.getMonth()+1;
+				var dayT = to.getUTCDate();
+				var fromDate = yearF+'/'+monthF+'/'+dayF;
+				var toDate = yearT+'/'+monthT+'/'+dayT; 
+
+				$("#slider-range").slider("option", "values", [fromDate, toDate]);
+				//to = selectedDate;
+				calendarFilter(from, to);
+			}
+		});
 /*********************************************************************************************************************************
 ************************************************************** SLider ************************************************************
 *********************************************************************************************************************************/
-/*		sliderDate.sort(function(a, b){return a-b});
 		$( "#slider-range" ).slider({
 			range: true,
-			min: sliderDate[0],
-			max: sliderDate[sliderDate.length-1],
-			values: [sliderDate[0], sliderDate[sliderDate.length-1]],
+			min: 0,
+			max: dates.length-1,
+			values: [0, dates.length-1],
 			slide: function( event, ui ) {
-				var from = new Date(1970, 0, ui.values[0]);
-				var to = new Date(1970, 0, ui.values[1]);
+				var from = dates[ui.values[0]];
+				var to = dates[ui.values[1]];
+console.log(ui)
+				var fromDate = new Date(parseInt(from.split('/')[0]), parseInt(from.split('/')[1])-1, parseInt(from.split('/')[2]));
+				var toDate = new Date(parseInt(to.split('/')[0]), parseInt(to.split('/')[1])-1, parseInt(to.split('/')[2]));
 				$('#from').val(from);
 				$('#to').val(to);
-				calendarFilter(from, to)
+				calendarFilter(fromDate, toDate)
 			}
-		});*/
-/*
-function calendarFilter(from, to){
-	fullDateDim.filter(function (d){
-		// FromYear < YEAR > ToYear
-		if ((d.getFullYear() > from.getFullYear()) && (d.getFullYear() < to.getFullYear())){
-			return d;
-		// "YEAR = FromYear" and "MONTH >= fromMonth"
-		} else if ((d.getFullYear() == from.getFullYear()) &&
-					(d.getUTCDate() >= from.getUTCDate())){
-			return d;
-		// "YEAR = FromYear" and "MONTH = FromMonth" and "DAY >= FromDay"
-		} else if ((d.getFullYear() == from.getFullYear()) && 
-					(d.getMonth() == from.getMonth()) &&
-					(d.getUTCDate() >= from.getUTCDate())){
-			return d;
-		// "YEAR = ToYear" and "MONTH <= ToMonth"
-		} else if ((d.getFullYear() == to.getFullYear()) &&
-					(d.getMonth() <= to.getMonth())){
-			return d;
-		// "YEAR = ToYear" and "MONTH = ToMonth" and "DAY <= ToDay"
-		} else if ((d.getFullYear() == to.getFullYear()) && 
-					(d.getMonth() == to.getMonth()) &&
-					(d.getUTCDate() <= to.getUTCDate())){
-			return d;
+		});
+
+		function calendarFilter(from, to){
+			fullDateDim.filter(function (d){
+				// FromYear < YEAR > ToYear
+				if ((d.getFullYear() > from.getFullYear()) && (d.getFullYear() < to.getFullYear())){
+					return d;
+				// "YEAR = FromYear" and "MONTH >= fromMonth"
+				} else if ((d.getFullYear() == from.getFullYear()) &&
+							(d.getUTCDate() >= from.getUTCDate())){
+					return d;
+				// "YEAR = FromYear" and "MONTH = FromMonth" and "DAY >= FromDay"
+				} else if ((d.getFullYear() == from.getFullYear()) && 
+							(d.getMonth() == from.getMonth()) &&
+							(d.getUTCDate() >= from.getUTCDate())){
+					return d;
+				// "YEAR = ToYear" and "MONTH <= ToMonth"
+				} else if ((d.getFullYear() == to.getFullYear()) &&
+							(d.getMonth() <= to.getMonth())){
+					return d;
+				// "YEAR = ToYear" and "MONTH = ToMonth" and "DAY <= ToDay"
+				} else if ((d.getFullYear() == to.getFullYear()) && 
+							(d.getMonth() == to.getMonth()) &&
+							(d.getUTCDate() <= to.getUTCDate())){
+					return d;
+				}
+			});
+			dc.redrawAll();
 		}
-	});
-	dc.redrawAll();
-}*/
+
 		dc.dataCount('.dc-data-count')
             .dimension(ndx)
             .group(all)
             .html({
-                some:'<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
-                    ' | <a href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>',
-                all:'All records selected. Please click on the graph to apply filters.'	
+                some:'<strong>%filter-count</strong> developer shows from a total for <strong>%total-count</strong> developers' +
+                ' | <a onclick="resetAll()">Show all</a>',
+            	all:'<strong>%filter-count</strong> developer shows from a total for <strong>%total-count</strong> developers' +
+                ' | <a onclick="resetAll()">Show all</a>'
             });
 /*********************************************************************************************************************************
 **************************************************************** Table ***********************************************************
@@ -482,7 +556,7 @@ function calendarFilter(from, to){
         });
         table
             .dimension(nameDim)
-            .group(function (d) {return d.dd.getFullYear();})
+            .group(function (d) {return "";})
             .size(20)
             .columns([
                 'id',
@@ -515,7 +589,22 @@ function calendarFilter(from, to){
 		table.on('renderlet', function(table) {
 			table.selectAll('.dc-table-group').classed('info', true);
 
-
+			$(window).bind('scroll', function(){
+//console.log($(window).scrollTop()+' = '+($('body').outerHeight() - $(window).innerHeight()))
+				if($(this).scrollTop() == ($('body').outerHeight() - $(window).innerHeight())) {
+				    var size = table.size();
+					var numero = $('.dc-data-count.dc-chart').html().split('<strong>')[1].split('</strong>')[0];
+					var total = parseInt(numero);
+					if (numero.split(',')[1] != undefined){
+						total = parseInt(numero.split(',')[0]+numero.split(',')[1]);
+					}
+//console.log(size+' '+total)
+					if (size < total){
+						table.size(size+5);
+						dc.redrawAll();
+					}
+				}
+			});
 		 });
 
 		$("#table-search").on('input',function(){
@@ -564,4 +653,15 @@ function dcFormat(d){
         array.push(dic);
     });
     return array;
+}
+/*********************************************************************************************************************************
+*********************************************************** Reset All ************************************************************
+*********************************************************************************************************************************/
+function resetAll(){
+	fullDateDim.filterAll();
+	dc.filterAll();
+	dc.renderAll();
+	$('#from').val(" ");
+	$('#to').val(" ");
+	$("#slider-range").slider("option", "values", [0, dates.length-1]);
 }

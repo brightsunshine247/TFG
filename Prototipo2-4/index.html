@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Git Activity Commits</title>
+    <title>Git Activity</title>
 
     <meta charset="UTF-8">
 	<!-- CSS -->
@@ -21,17 +21,41 @@
 </head>
     <body>
         <div class="container">
-			<h1 align="center"> Git Activity Commits </h1><hr>
+			
+			<div id="load" align="center">
+				<img src="../img/load.GIF">
+			</div>
+
+			<div class="dc-data-count">
+	<!--                    <span class="filter-count"></span> selected out of <span class="total-count"></span> records | <a 
+		                href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a> -->
+	        </div>
+				<h1 align="right"style="font-size: 60px;margin-right: 10%;">
+					Git Activity
+				</h1>
+			<hr>
+			<div class="comment"><h4>Actionable data dashboard. Click on charts, slider, data table to filter data shown. To show all data again, click Show All.</h4></div>
+			<div style="padding: 10px;">
+				<div style="float:left; height:80px; margin-top: 10px;"><h5>Date range: </h5></div>
+				<div style="width:950px;height:80px; margin-left:100px">
+					<label for="from" style="float: left;">from &nbsp;&nbsp;</label>
+					<input type="text" id="from" name="from" value=" " style="float: left; width:200px; height:15px;">
+					<label for="to" style="float: left;">&nbsp;&nbsp; to &nbsp;&nbsp;</label>
+					<input type="text" id="to" name="to" value=" " style="width:200px; height:15px;">
+					<br>
+					<div id="slider-range" style="z-index:1;"></div><br>
+				</div>
+			</div><br>
 			<div class="row">
 				<div id="year-chart">
-                    <strong title="Commits by year">Year</strong>
+                    <strong title="Commits by year">Years</strong>
 					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
 					<a class="reset" href="javascript:yearChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
                     <div class="clearfix"></div>
                 </div>
 				
                 <div id="month-chart">
-                    <strong title="Commits by month">Month</strong>
+                    <strong title="Commits by month">Months</strong>
 					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
 					<a class="reset" href="javascript:monthChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
                     <div class="clearfix"></div>
@@ -47,7 +71,7 @@
 
 			<div class="row">
 				<div id="company-chart">
-                    <strong title="Commits by companies">Companies</strong>
+                    <strong title="Commits by companies">Commits per companies</strong>
 					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
 					<a class="reset" href="javascript:companyChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
                     <div class="clearfix"></div>
@@ -61,7 +85,7 @@
 		
 			<div class="row">
 				<div id="repo-chart">
-                    <strong title="Commits by repository">Repositories</strong>
+                    <strong title="Commits by repository">Commits per repositories</strong>
 					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
 					<a class="reset" href="javascript:repoChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
                     <div class="clearfix"></div>
@@ -75,7 +99,7 @@
 
 			<div class="row">
 				<div id="tz-chart">
-                    <strong title="Commits by time zone">Time Zone</strong>
+                    <strong title="Commits by time zone">Commits per time zones</strong>
 					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
 					<a class="reset" href="javascript:tzChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
                     <div class="clearfix"></div>
@@ -89,7 +113,7 @@
 
 			<div class="row">
 				<div id="commit-chart">
-                    <strong title="All commits" >Commit</strong>
+                    <strong title="All commits" >Commit per month</strong>
 					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
 					<a class="reset" href="javascript:commitChart.filterAll();commitSliderChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
                     <div class="clearfix"></div>
@@ -103,13 +127,13 @@
 
 			<div class="row">
 				<div id="comp-time-chart">
-                    <strong>Company</strong>
+                    <strong>Active companiy per month</strong>
 					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
 					<a class="reset" href="javascript:compTimeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
                     <div class="clearfix"></div>
                 </div>
 				<div id="repo-time-chart">
-                    <strong>Repository</strong>
+                    <strong>Active repository per month</strong>
 					<span class="reset" style="display: none;">range: <span class="filter"></span></span>
 					<a class="reset" href="javascript:repoTimeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
                     <div class="clearfix"></div>
@@ -125,18 +149,9 @@
 
             <div class="row">
 				<hr>
-				<label for="from" style="float: left;"><strong>Date range:</strong> from</label>
-				<input type="text" id="from" name="from" value=" " style="float: left; height:15px;">
-				<label for="to" style="float: left;"> to</label>
-				<input type="text" id="to" name="to" value=" " style="height:15px;">
-				<br>
-				<div id="slider-range" style="z-index:1;"></div><br>
-                <div class="dc-data-count">
-                    <span class="filter-count"></span> selected out of <span class="total-count"></span> records | <a 
-                        href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
-                </div>
-				<div align="right">Search by Name: <input type="text" id="table-search" value=""></input></div>
-				The table shows only first 20 records if you not select any filter
+				At most 20 developers shown. Sroll down for more.
+				<div align="right" style="float:right">Search by Name: <input type="text" id="table-search" value=""></input></div>
+				
 	            <table class="table table-hover dc-data-table"></table>
             </div>
         </div>

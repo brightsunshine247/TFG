@@ -209,7 +209,7 @@ img.mg-lg{
 .col-sm-5 {
 	width: 50%;
 }
-#hero-bloc h5 {
+#hero-bloc h3 {
 	color: #59636b;
 }
 #hero-bloc h1 {

@@ -181,7 +181,7 @@ $(document).ready(function(){
 			.centerBar(true)
 		    .renderHorizontalGridLines(true)
 		    .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
-		    .brushOn(false)
+		    .brushOn(true)
 		    .group(companyGrp, 'Companies')
 			.ordering(function(d) { return -d.value })
 		    .title(function (d) {
@@ -274,7 +274,7 @@ $(document).ready(function(){
 			.centerBar(true)
 		    .renderHorizontalGridLines(true)
 		    .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
-		    .brushOn(false)
+		    .brushOn(true)
 		    .group(tzGrp, 'Time Zone');
 
 		tzSliderChart
@@ -414,7 +414,7 @@ $(document).ready(function(){
 			.elasticY(true)
 		    .renderHorizontalGridLines(true)
 		    .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
-		    .brushOn(false)
+		    .brushOn(true)
 		    .group(repoTGrp, 'Repository by Date');
 
 		repoTimeSliderChart
@@ -556,7 +556,7 @@ console.log(ui)
         });
         table
             .dimension(nameDim)
-            .group(function (d) {return d.dd.getFullYear();})
+            .group(function (d) {return "";})
             .size(20)
             .columns([
                 'id',
