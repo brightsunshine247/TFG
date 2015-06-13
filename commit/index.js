@@ -559,7 +559,12 @@ console.log(ui)
             .group(function (d) {return "";})
             .size(20)
             .columns([
-                'commit id',
+				{
+					label: 'Commit Id',
+					format: function (d) {
+						return d.id;	
+					} 
+				},
 				{
 					label: 'Date',
 					format: function (d) {
