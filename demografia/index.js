@@ -669,7 +669,10 @@ function birAgin(d1, d2){
 	for (var i=0; i<value1[0].length; i++){
 		var TZ = Math.floor(Math.random() * (13 + 12) - 12);
 		tz.push(TZ);
-		var index = Math.floor(Math.random()*6);
+		var index = Math.floor(Math.random()*9)+1;
+		if (index == 6) {index = 3}
+		else if (index == 7) {index = 1}
+		else if (index == 8) {index = 2}
 		company.push(companies[index]);
 		var yes = 0;
 		var no = 1;
