@@ -453,7 +453,7 @@ $(document).ready(function(){
 				$( "#to" ).datepicker( "option", "minDate", selectedDate );
 				from = new Date(parseInt(selectedDate.split('/')[2]), parseInt(selectedDate.split('/')[0])-1, parseInt(selectedDate.split('/')[1]));
 				if (to == undefined){
-					to = new Date(parseInt(dates[dates.length-1].split('/')[0]), parseInt(dates[dates.length-1].split('/')[1]), parseInt(dates[dates.length-1].split('/')[2]));
+					to = new Date(parseInt(dates[dates.length-1].split('/')[0]), parseInt(dates[dates.length-1].split('/')[1])-1, parseInt(dates[dates.length-1].split('/')[2]));
 				}
 				var yearF = from.getFullYear();
 				var monthF = from.getMonth()+1;
@@ -461,8 +461,48 @@ $(document).ready(function(){
 				var yearT = to.getFullYear();
 				var monthT = to.getMonth()+1;
 				var dayT = to.getUTCDate();
-				var fromDate = yearF+'/'+monthF+'/'+dayF;
-				var toDate = yearT+'/'+monthT+'/'+dayT; 
+				if (yearF < 2010) {
+					yearF = 2010;
+					monthF = 6;
+					dayF = 10;
+				} else if ((yearF == 2010) && (monthF < 6)) {
+					monthF = 6;
+					dayF = 10;
+				} else if ((yearF == 2010) && (monthF == 6) && (dayF < 10)) {
+					dayF = 10;
+				}
+				if (yearT > 2015){
+					yearT = 2015;
+				} else if ((yearT == 2015) && (monthT > 5)) {
+					monthT = 5;
+					dayT = 1;
+				} else if ((yearT == 2015) && (monthT == 5) && (dayT != 1)) {
+					dayT = 1;
+				}
+				for(var i=0; i<31; i++){
+					if (i == 30) {
+						monthF++;
+						i = 0;
+					}
+					if (dates.indexOf(yearF+'/'+monthF+'/'+dayF) != -1){
+						var fromDate = dates.indexOf(yearF+'/'+monthF+'/'+dayF);
+						break;
+					} else {
+						dayF++;
+					}
+				}
+				for(var i=0; i<31; i++){
+					if (i == 30) {
+						monthT++;
+						i = 0;
+					}
+					if (dates.indexOf(yearT+'/'+monthT+'/'+dayT) != -1){
+						var toDate = dates.indexOf(yearT+'/'+monthT+'/'+dayT); 
+						break;
+					} else {
+						dayT++;
+					}
+				}
 				$("#slider-range").slider("option", "values", [fromDate, toDate]);
 				calendarFilter(from, to);
 			}
@@ -474,7 +514,7 @@ $(document).ready(function(){
 			onClose: function( selectedDate ) {
 				$( "#from" ).datepicker( "option", "maxDate", selectedDate );
 				if (from == undefined){
-					from = new Date(parseInt(dates[0].split('/')[0]), parseInt(dates[0].split('/')[1]), parseInt(dates[0].split('/')[2]));
+					from = new Date(parseInt(dates[0].split('/')[0]), parseInt(dates[0].split('/')[1])-1, parseInt(dates[0].split('/')[2]));
 				}
 				to = new Date(parseInt(selectedDate.split('/')[2]), parseInt(selectedDate.split('/')[0])-1, parseInt(selectedDate.split('/')[1]));
 				var yearF = from.getFullYear();
@@ -483,9 +523,48 @@ $(document).ready(function(){
 				var yearT = to.getFullYear();
 				var monthT = to.getMonth()+1;
 				var dayT = to.getUTCDate();
-				var fromDate = yearF+'/'+monthF+'/'+dayF;
-				var toDate = yearT+'/'+monthT+'/'+dayT; 
-
+				if (yearF < 2010) {
+					yearF = 2010;
+					monthF = 6;
+					dayF = 10;
+				} else if ((yearF == 2010) && (monthF < 6)) {
+					monthF = 6;
+					dayF = 10;
+				} else if ((yearF == 2010) && (monthF == 6) && (dayF < 10)) {
+					dayF = 10;
+				}
+				if (yearT > 2015){
+					yearT = 2015;
+				} else if ((yearT == 2015) && (monthT > 5)) {
+					monthT = 5;
+					dayT = 1;
+				} else if ((yearT == 2015) && (monthT == 5) && (dayT != 1)) {
+					dayT = 1;
+				}
+				for(var i=0; i<31; i++){
+					if (i == 30) {
+						monthF++;
+						i = 0;
+					} 
+					if (dates.indexOf(yearF+'/'+monthF+'/'+dayF) != -1){
+						var fromDate = dates.indexOf(yearF+'/'+monthF+'/'+dayF);
+						break;
+					} else {
+						dayF++;
+					}
+				}
+				for(var i=0; i<31; i++){
+					if (i == 30) {
+						monthT++;
+						i = 0;
+					} 
+					if (dates.indexOf(yearT+'/'+monthT+'/'+dayT) != -1){
+						var toDate = dates.indexOf(yearT+'/'+monthT+'/'+dayT); 
+						break;
+					} else {
+						dayT++;
+					}
+				}
 				$("#slider-range").slider("option", "values", [fromDate, toDate]);
 				//to = selectedDate;
 				calendarFilter(from, to);
@@ -502,7 +581,6 @@ $(document).ready(function(){
 			slide: function( event, ui ) {
 				var from = dates[ui.values[0]];
 				var to = dates[ui.values[1]];
-console.log(ui)
 				var fromDate = new Date(parseInt(from.split('/')[0]), parseInt(from.split('/')[1])-1, parseInt(from.split('/')[2]));
 				var toDate = new Date(parseInt(to.split('/')[0]), parseInt(to.split('/')[1])-1, parseInt(to.split('/')[2]));
 				$('#from').val(from);
